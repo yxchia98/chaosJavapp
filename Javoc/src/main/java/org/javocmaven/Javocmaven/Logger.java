@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,6 +17,9 @@ import java.util.TimerTask;
 
 import com.google.gson.GsonBuilder;
 import com.opencsv.CSVWriter;
+
+import oshi.SystemInfo;
+import oshi.hardware.HardwareAbstractionLayer;
 
 public class Logger extends TimerTask {
 	private String date, time, cpuload = " ", os, totalmem_string, usedmem_string, usedpercentmem_string,
@@ -41,13 +43,12 @@ public class Logger extends TimerTask {
 		this.usedspace_string = String.valueOf(Math.toIntExact((long) (usedspace / Math.pow(2, 20))));
 		this.usedpercentdisk_string = String.valueOf(Math.round(usedpercentdisk));
 
-		com.sun.management.OperatingSystemMXBean oslog = (com.sun.management.OperatingSystemMXBean) ManagementFactory
-				.getOperatingSystemMXBean();
+		SystemInfo si = new SystemInfo();
+		HardwareAbstractionLayer hal = si.getHardware();
 
-		long totalmem = oslog.getTotalMemorySize();
-		long freemem = oslog.getFreeMemorySize();
+		long totalmem = hal.getMemory().getTotal();
+		long freemem = hal.getMemory().getAvailable();
 		long usedmem = totalmem - freemem;
-//		long jvmmem = Runtime.getRuntime().maxMemory();
 		double usedpercentmem = (double) usedmem / totalmem * 100;
 		this.totalmem_string = String.valueOf(Math.toIntExact((long) (totalmem / Math.pow(2, 20))));
 		this.usedmem_string = String.valueOf(Math.toIntExact((long) (usedmem / Math.pow(2, 20))));
