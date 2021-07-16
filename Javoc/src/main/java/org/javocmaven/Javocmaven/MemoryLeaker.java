@@ -40,17 +40,14 @@ public class MemoryLeaker extends Loader {
 		SystemInfo si = new SystemInfo();
 		HardwareAbstractionLayer hal = si.getHardware();
 		double totalmem = hal.getMemory().getTotal();
-//		System.out.println("Total Memory(MB): " + os.getTotalMemorySize() / Math.pow(2, 20));
-//		System.out.println("Free Memory(MB): " + os.getFreeMemorySize() / Math.pow(2, 20));
-//		System.out.println("Used Memory(MB): " + (os.getTotalMemorySize() - os.getFreeMemorySize()) / Math.pow(2, 20));
-//		System.out.println("JVM Allocated Memory(MB): " + (Runtime.getRuntime().maxMemory()) / Math.pow(2, 20));
 
 		double targetMemory = this.utilization / 100 * totalmem;
-//		System.out.println("Target Memory usage: " + targetMemory / Math.pow(2, 20));
+		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20) + "\nTarget Memory usage: " + targetMemory / Math.pow(2, 20));
 		ArrayList<char[]> hog = new ArrayList<char[]>();
 		Runtime.getRuntime().gc();
 		while ((totalmem - hal.getMemory().getAvailable()) < targetMemory) {
-			hog.add(new char[524288]);
+			System.out.println("Used Memory: " + (totalmem - hal.getMemory().getAvailable()) / Math.pow(2, 20));
+			hog.add(new char[52428800]);
 		}
 		System.out.println();
 		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20));
