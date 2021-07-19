@@ -15,7 +15,7 @@ public class BusyThread extends Thread {
 	@Override
 	public void run() {
 		super.run();
-		System.out.println(this.getName());
+//		System.out.println(this.getName());
 		try {
 			while (LocalDateTime.now().isBefore(endtime)) {
 				// Every 100ms, sleep for the percentage of unladen time

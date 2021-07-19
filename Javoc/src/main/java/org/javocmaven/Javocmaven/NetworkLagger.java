@@ -94,6 +94,8 @@ public class NetworkLagger extends Loader {
 			}
 
 		}
+		
+		System.out.println("Executed.");
 
 	}
 

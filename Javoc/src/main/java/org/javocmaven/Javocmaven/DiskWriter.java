@@ -36,7 +36,7 @@ public class DiskWriter extends Loader {
 	}
 
 	public void load() {
-		System.out.println("Utilizing " + (int) this.utilization + "% of current partition.");
+//		System.out.println("Utilizing " + (int) this.utilization + "% of current partition.");
 
 		File diskpartition = new File("/");
 		long totalspace = diskpartition.getTotalSpace();
@@ -105,65 +105,4 @@ public class DiskWriter extends Loader {
 			e.printStackTrace();
 		}
 	}
-
-//	public void load() {
-//		System.out.println("Writing to Disk, duration: " + this.duration + "s, utilization: " + this.utilization + "MB/s");
-//		LocalDateTime endtime = LocalDateTime.now().plusSeconds(this.duration);
-//		File myObj = new File("hogger.txt");
-//		char[] chars = new char[(int) ((1048576 * this.utilization) - 2)];
-//		Arrays.fill(chars, 'f');
-//		String megString = new String(chars) + "\n";
-//
-//		try (RandomAccessFile file = new RandomAccessFile(myObj, "rws")) {
-//			RandomAccessFile readFile = new RandomAccessFile(myObj, "rws");
-//			file.seek(0);
-//			readFile.seek(0);
-//			while (LocalDateTime.now().isBefore(endtime)) {
-//				if ((System.currentTimeMillis() % 1000) == 0) {
-//					file.writeBytes(megString);
-////					System.out.println("writing " + megString.getBytes().length + "bytes");
-//					Thread.sleep(1);
-////					readFile.readLine();
-//				}
-//			}
-//			readFile.close();
-//			file.close();
-//		} catch (IOException e) {
-//			System.out.println("An error occurred.");
-//			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		myObj.deleteOnExit();
-//	}
-
-//	public static void DiskLoad(int duration, double loadinMBs) {
-//		LocalDateTime endtime = LocalDateTime.now().plusSeconds(duration);
-//		File myObj = new File("hogger.txt");
-//		char[] chars = new char[(int) ((1048576 * loadinMBs) - 2)];
-//		Arrays.fill(chars, 'f');
-//		String megString = new String(chars) + "\n";
-//
-//		try (RandomAccessFile file = new RandomAccessFile(myObj, "rws")) {
-//			RandomAccessFile readFile = new RandomAccessFile(myObj, "rws");
-//			file.seek(0);
-//			readFile.seek(0);
-//			while (LocalDateTime.now().isBefore(endtime)) {
-//				if ((System.currentTimeMillis() % 1000) == 0) {
-//					file.writeBytes(megString);
-////					System.out.println("writing " + megString.getBytes().length + "bytes");
-//					Thread.sleep(1);
-////					readFile.readLine();
-//				}
-//			}
-//			readFile.close();
-//			file.close();
-//		} catch (IOException e) {
-//			System.out.println("An error occurred.");
-//			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		myObj.deleteOnExit();
-//	}
 }

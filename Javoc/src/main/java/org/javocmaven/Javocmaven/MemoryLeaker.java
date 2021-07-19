@@ -48,17 +48,17 @@ public class MemoryLeaker extends Loader {
 		while ((totalmem - hal.getMemory().getAvailable()) < targetMemory) {
 			hog.add(new char[52428800]);
 		}
-		System.out.println();
-		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20));
-		System.out.println("Free Memory: " + hal.getMemory().getAvailable() / Math.pow(2, 20));
-		System.out.println("Used Memory: " + (totalmem - hal.getMemory().getAvailable()) / Math.pow(2, 20));
+//		System.out.println();
+//		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20));
+//		System.out.println("Free Memory: " + hal.getMemory().getAvailable() / Math.pow(2, 20));
+//		System.out.println("Used Memory: " + (totalmem - hal.getMemory().getAvailable()) / Math.pow(2, 20));
 		try {
 			Thread.sleep(this.duration * 1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			System.out.println("Error putting thread to sleep");
 		}
-		System.out.println("Successfully executed.");
+		System.out.println("Executed.");
 
 	}
 }
