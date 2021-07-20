@@ -20,26 +20,15 @@ public class NetworkLagger extends Loader {
 		this.utilization = utilization;
 	}
 
-	public NetworkLagger(String[] arguments, String type, String durationType) {
+	public NetworkLagger(String[] arguments, String type, int multiplier) {
 		this.type = type;
-		if (durationType.equals("seconds")) {
-			if (arguments.length >= 2) {
-				this.duration = Integer.parseInt(arguments[0]);
-				this.utilization = Double.parseDouble(arguments[1]);
-			} else if (arguments.length == 1) {
-				this.duration = Integer.parseInt(arguments[0]);
-			} else {
-			}
+		if (arguments.length >= 2) {
+			this.duration = Integer.parseInt(arguments[0]) * multiplier;
+			this.utilization = Double.parseDouble(arguments[1]);
+		} else if (arguments.length == 1) {
+			this.duration = Integer.parseInt(arguments[0]) * multiplier;
 		} else {
-			if (arguments.length >= 2) {
-				this.duration = Integer.parseInt(arguments[0]) * 60;
-				this.utilization = Double.parseDouble(arguments[1]);
-			} else if (arguments.length == 1) {
-				this.duration = Integer.parseInt(arguments[0]) * 60;
-			} else {
-			}
 		}
-
 	}
 
 	public void load() {
@@ -47,7 +36,7 @@ public class NetworkLagger extends Loader {
 		if (operatingSystem.contains("Windows")) {
 			try {
 				File clumsyfolder = new File(ResourceFile.getJarDir() + "\\clumsy-0.3rc3-win64");
-				if(!clumsyfolder.isDirectory()) {
+				if (!clumsyfolder.isDirectory()) {
 					extractClumsy();
 				}
 			} catch (URISyntaxException | IOException | InterruptedException e) {
@@ -94,7 +83,7 @@ public class NetworkLagger extends Loader {
 			}
 
 		}
-		
+
 		System.out.println("Executed.");
 
 	}

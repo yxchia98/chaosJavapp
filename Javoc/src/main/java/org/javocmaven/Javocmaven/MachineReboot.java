@@ -4,34 +4,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class MachineReboot extends Loader{
-	
-	int duration = 0;
-	
-	public MachineReboot(String[] arguments, String durationType) {
-		if (durationType.equals("seconds")) {
-			if (arguments.length >= 1) {
-				this.duration = Integer.parseInt(arguments[0]);
-			}
-		}
-		else {
-			if (arguments.length >= 1) {
-				this.duration = Integer.parseInt(arguments[0]) * 60;
-			}
-		}
+public class MachineReboot extends Loader {
 
+	int duration = 0;
+
+	public MachineReboot(String[] arguments, int multiplier) {
+		if (arguments.length >= 1) {
+			this.duration = Integer.parseInt(arguments[0]) * multiplier;
+		}
 	}
 
 	public void load() {
 		String operatingSystem = System.getProperty("os.name");
 		if (operatingSystem.contains("Windows")) {
 			rebootWindows();
-		}
-		else {
+		} else {
 			rebootLinux();
 		}
 	}
-	
+
 	private void rebootWindows() {
 		String command = "Restart-Computer -Force";
 		try {
@@ -43,9 +34,9 @@ public class MachineReboot extends Loader{
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void rebootLinux() {
-		
+
 		String command = "shutdown -r now";
 		try {
 			System.out.println("Rebooting System in " + this.duration + "seconds. (Linux)");
@@ -55,7 +46,7 @@ public class MachineReboot extends Loader{
 			e.printStackTrace();
 		}
 	}
-	
+
 	protected void execCommand(ProcessBuilder builder) throws IOException {
 		builder.redirectErrorStream(true);
 		Process p = builder.start();
@@ -74,5 +65,5 @@ public class MachineReboot extends Loader{
 		stderr.close();
 		p.destroy();
 	}
-	
+
 }

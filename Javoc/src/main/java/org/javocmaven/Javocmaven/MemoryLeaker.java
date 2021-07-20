@@ -14,24 +14,13 @@ public class MemoryLeaker extends Loader {
 		this.utilization = utilization;
 	}
 
-	public MemoryLeaker(String arguments[], String durationType) {
-
-		if (durationType.equals("seconds")) {
-			if (arguments.length >= 2) {
-				this.duration = Integer.parseInt(arguments[0]);
-				this.utilization = Double.parseDouble(arguments[1]);
-			} else if (arguments.length == 1) {
-				this.duration = Integer.parseInt(arguments[0]);
-			} else {
-			}
+	public MemoryLeaker(String arguments[], int multiplier) {
+		if (arguments.length >= 2) {
+			this.duration = Integer.parseInt(arguments[0]) * multiplier;
+			this.utilization = Double.parseDouble(arguments[1]);
+		} else if (arguments.length == 1) {
+			this.duration = Integer.parseInt(arguments[0]) * multiplier;
 		} else {
-			if (arguments.length >= 2) {
-				this.duration = Integer.parseInt(arguments[0]) * 60;
-				this.utilization = Double.parseDouble(arguments[1]);
-			} else if (arguments.length == 1) {
-				this.duration = Integer.parseInt(arguments[0]) * 60;
-			} else {
-			}
 		}
 
 	}
@@ -42,7 +31,8 @@ public class MemoryLeaker extends Loader {
 		double totalmem = hal.getMemory().getTotal();
 
 		double targetMemory = this.utilization / 100 * totalmem;
-		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20) + "\nTarget Memory usage: " + targetMemory / Math.pow(2, 20));
+		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20) + "\nTarget Memory usage: "
+				+ targetMemory / Math.pow(2, 20));
 		ArrayList<char[]> hog = new ArrayList<char[]>();
 		Runtime.getRuntime().gc();
 		while ((totalmem - hal.getMemory().getAvailable()) < targetMemory) {

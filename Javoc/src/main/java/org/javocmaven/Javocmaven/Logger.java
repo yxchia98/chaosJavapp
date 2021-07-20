@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,8 +18,8 @@ import java.util.List;
 import java.util.TimerTask;
 
 import com.google.gson.GsonBuilder;
-import com.opencsv.CSVWriter;
 
+import de.siegmar.fastcsv.writer.CsvWriter;
 import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 
@@ -88,25 +90,31 @@ public class Logger extends TimerTask {
 		if (file.exists()) {
 			// append to file
 			try {
+				CsvWriter csv = CsvWriter.builder().build(file.toPath(), StandardCharsets.UTF_8,
+						StandardOpenOption.APPEND);
 				csvData.add(csvLog);
-				CSVWriter writer = new CSVWriter(new FileWriter(path, true));
-				writer.writeAll(csvData, false);
-				writer.close();
+				for (String[] data : csvData) {
+					csv.writeRow(data);
+				}
+				csv.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
 		} else {
+			// create new file and add headers before logging data
+			String[] header = { "Log Date", "Log Time", "Platform", "CPU Load(%)", "Total Memory(MB)",
+					"Used Memory(MB)", "Used Memory(%)", "Total Space(MB)", "Used Space(MB)", "Used Space(%)" };
 			try {
-				String[] header = { "Log Date", "Log Time", "Platform", "CPU Load(%)", "Total Memory(MB)",
-						"Used Memory(MB)", "Used Memory(%)", "Total Space(MB)", "Used Space(MB)", "Used Space(%)" };
+				CsvWriter csv = CsvWriter.builder().build(file.toPath(), StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE);
 				csvData.add(header);
 				csvData.add(csvLog);
-				CSVWriter writer = new CSVWriter(new FileWriter(path));
-				writer.writeAll(csvData, false);
-				writer.close();
+				for (String[] data : csvData) {
+					csv.writeRow(data);
+				}
+				csv.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -116,7 +124,7 @@ public class Logger extends TimerTask {
 	private void exportJSON() {
 
 		LinkedHashMap<String, String> valuesmap = new LinkedHashMap<>();
-		
+
 		String path = "." + File.separator + "javoc_log" + File.separator + "javoclog.json";
 		File file = new File(path);
 		file.getParentFile().mkdirs();
@@ -158,7 +166,7 @@ public class Logger extends TimerTask {
 	}
 
 	private void exportTXT() {
-		
+
 		String path = "." + File.separator + "javoc_log" + File.separator + "javoclog.txt";
 		File file = new File(path);
 		file.getParentFile().mkdirs();
