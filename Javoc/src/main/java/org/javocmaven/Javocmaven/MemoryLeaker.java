@@ -26,13 +26,14 @@ public class MemoryLeaker extends Loader {
 	}
 
 	public void load() {
+		System.out.println("Loading Memory for " + this.duration + "s at " + this.utilization + "%. (" + Logger.getCurrentDateTime() + ")");
 		SystemInfo si = new SystemInfo();
 		HardwareAbstractionLayer hal = si.getHardware();
 		double totalmem = hal.getMemory().getTotal();
 
 		double targetMemory = this.utilization / 100 * totalmem;
-		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20) + "\nTarget Memory usage: "
-				+ targetMemory / Math.pow(2, 20));
+//		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20) + "\nTarget Memory usage: "
+//				+ targetMemory / Math.pow(2, 20));
 		ArrayList<char[]> hog = new ArrayList<char[]>();
 		Runtime.getRuntime().gc();
 		while ((totalmem - hal.getMemory().getAvailable()) < targetMemory) {
@@ -48,7 +49,6 @@ public class MemoryLeaker extends Loader {
 			e.printStackTrace();
 			System.out.println("Error putting thread to sleep");
 		}
-		System.out.println("Executed.");
 
 	}
 }

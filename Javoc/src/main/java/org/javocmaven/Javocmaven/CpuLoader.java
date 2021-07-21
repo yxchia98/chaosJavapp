@@ -24,6 +24,7 @@ public class CpuLoader extends Loader {
 	}
 
 	public void load() {
+		System.out.println("Loading CPU for " + this.duration + "s at " + this.utilization + "%. (" + Logger.getCurrentDateTime() + ")");
 		int numCores = Runtime.getRuntime().availableProcessors();
 		LocalDateTime endtime = LocalDateTime.now().plusSeconds(this.duration);
 		for (int i = 0; i < numCores; i++) {

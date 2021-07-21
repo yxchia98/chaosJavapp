@@ -6,8 +6,6 @@ import java.util.Timer;
 import picocli.CommandLine;
 
 public class MainMenu {
-	
-	
 
 	private static void executeLoad(Loader loadObj) {
 		loadObj.load();
@@ -85,6 +83,7 @@ public class MainMenu {
 		}
 		timer.cancel();
 		timer.purge();
+		System.out.println("Executed.");
 	}
 
 //	public static void main(String[] args) {

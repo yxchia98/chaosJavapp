@@ -44,19 +44,19 @@ public class NetworkLagger extends Loader {
 			}
 			if (this.type.equals("lag")) {
 				System.out.println("Injecting network latency of " + this.utilization + "ms, for " + this.duration
-						+ "s (Windows machine)");
+						+ "s (Windows machine). (" + Logger.getCurrentDateTime() + ")");
 				this.lagWindows();
 			} else if (this.type.equals("noise")) {
 				System.out.println("Injecting network packet duplication of " + this.utilization + "%, for "
-						+ this.duration + "s (Windows machine)");
+						+ this.duration + "s (Windows machine). (" + Logger.getCurrentDateTime() + ")");
 				this.noiseWindows();
 			} else if (this.type.equals("drop")) {
 				System.out.println("Injecting network packet loss of " + this.utilization + "%, for " + this.duration
-						+ "s (Windows machine)");
+						+ "s (Windows machine). (" + Logger.getCurrentDateTime() + ")");
 				this.dropWindows();
 			} else if (this.type.equals("throttle")) {
 				System.out.println("Throttling bandwith to " + this.utilization + "MBs, for " + this.duration
-						+ "s (Windows machine)");
+						+ "s (Windows machine). (" + Logger.getCurrentDateTime() + ")");
 				this.throttleWindows();
 			} else {
 				System.out.println("Invalid Arguments entered");
@@ -64,27 +64,25 @@ public class NetworkLagger extends Loader {
 		} else if (operatingSystem.contains("Linux")) {
 			if (this.type.equals("lag")) {
 				System.out.println("Injecting network latency of " + this.utilization + "ms, for " + this.duration
-						+ "s (Linux machine)");
+						+ "s (Linux machine). (" + Logger.getCurrentDateTime() + ")");
 				this.lagLinux();
 			} else if (this.type.equals("noise")) {
 				System.out.println("Injecting network packet duplication of " + this.utilization + "%, for "
-						+ this.duration + "s (Linux machine)");
+						+ this.duration + "s (Linux machine). (" + Logger.getCurrentDateTime() + ")");
 				this.noiseLinux();
 			} else if (this.type.equals("drop")) {
 				System.out.println("Injecting network packet loss of " + this.utilization + "%, for " + this.duration
-						+ "s (Linux machine)");
+						+ "s (Linux machine). (" + Logger.getCurrentDateTime() + ")");
 				this.dropLinux();
 			} else if (this.type.equals("throttle")) {
 				System.out.println("Throttling bandwith to " + this.utilization + "MBs, for " + this.duration
-						+ "s (Linux machine)");
+						+ "s (Linux machine). (" + Logger.getCurrentDateTime() + ")");
 				this.throttleLinux();
 			} else {
 				System.out.println("Invalid Arguments entered");
 			}
 
 		}
-
-		System.out.println("Executed.");
 
 	}
 

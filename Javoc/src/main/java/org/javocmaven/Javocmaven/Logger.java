@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +31,8 @@ public class Logger extends TimerTask {
 	public void run() {
 		File disklog = new File("/");
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		
+		DecimalFormat df = new DecimalFormat("0.00");
 
 		Date datetime = new Date(ts.getTime());
 		DateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
@@ -41,9 +44,9 @@ public class Logger extends TimerTask {
 		long freespace = disklog.getUsableSpace();
 		long usedspace = totalspace - freespace;
 		double usedpercentdisk = (double) usedspace / totalspace * 100;
-		this.totalspace_string = String.valueOf(Math.toIntExact((long) (totalspace / Math.pow(2, 20))));
-		this.usedspace_string = String.valueOf(Math.toIntExact((long) (usedspace / Math.pow(2, 20))));
-		this.usedpercentdisk_string = String.valueOf(Math.round(usedpercentdisk));
+		this.totalspace_string = df.format(totalspace / Math.pow(2, 20));
+		this.usedspace_string = df.format(usedspace / Math.pow(2, 20));
+		this.usedpercentdisk_string = df.format(usedpercentdisk);
 
 		SystemInfo si = new SystemInfo();
 		HardwareAbstractionLayer hal = si.getHardware();
@@ -52,9 +55,9 @@ public class Logger extends TimerTask {
 		long freemem = hal.getMemory().getAvailable();
 		long usedmem = totalmem - freemem;
 		double usedpercentmem = (double) usedmem / totalmem * 100;
-		this.totalmem_string = String.valueOf(Math.toIntExact((long) (totalmem / Math.pow(2, 20))));
-		this.usedmem_string = String.valueOf(Math.toIntExact((long) (usedmem / Math.pow(2, 20))));
-		this.usedpercentmem_string = String.valueOf(Math.round(usedpercentmem));
+		this.totalmem_string = df.format(totalmem / Math.pow(2, 20));
+		this.usedmem_string = df.format(usedmem / Math.pow(2, 20));
+		this.usedpercentmem_string = df.format(usedpercentmem);
 
 		this.os = System.getProperty("os.name");
 
@@ -123,7 +126,7 @@ public class Logger extends TimerTask {
 
 	private void exportJSON() {
 
-		LinkedHashMap<String, String> valuesmap = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> valuesmap = new LinkedHashMap<>();
 
 		String path = "." + File.separator + "javoc_log" + File.separator + "javoclog.json";
 		File file = new File(path);
@@ -132,13 +135,13 @@ public class Logger extends TimerTask {
 		valuesmap.put("Log Date", this.date);
 		valuesmap.put("Log Time", this.time);
 		valuesmap.put("Platform", this.os);
-		valuesmap.put("CPU Load(%)", this.cpuload);
-		valuesmap.put("Total Memory(MB)", this.totalmem_string);
-		valuesmap.put("Used Memory(MB)", this.usedmem_string);
-		valuesmap.put("Used Memory(%)", this.usedpercentmem_string);
-		valuesmap.put("Total Disk(MB)", this.totalspace_string);
-		valuesmap.put("Used Disk(MB)", this.usedspace_string);
-		valuesmap.put("Used Disk(%)", this.usedpercentdisk_string);
+		valuesmap.put("CPU Load(%)", Double.parseDouble(this.cpuload));
+		valuesmap.put("Total Memory(MB)", Double.parseDouble(this.totalmem_string));
+		valuesmap.put("Used Memory(MB)", Double.parseDouble(this.usedmem_string) );
+		valuesmap.put("Used Memory(%)", Double.parseDouble(this.usedpercentmem_string));
+		valuesmap.put("Total Disk(MB)", Double.parseDouble( this.totalspace_string));
+		valuesmap.put("Used Disk(MB)", Double.parseDouble(this.usedspace_string));
+		valuesmap.put("Used Disk(%)", Double.parseDouble(this.usedpercentdisk_string));
 		GsonBuilder builder = new GsonBuilder();
 		builder.setPrettyPrinting();
 		String jsonData = builder.create().toJson(valuesmap);
@@ -242,5 +245,13 @@ public class Logger extends TimerTask {
 			}
 		}
 		return line;
+	}
+	
+	public static String getCurrentDateTime() {
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		Date datetime = new Date(ts.getTime());
+		DateFormat datetimeformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String datetimestring = datetimeformat.format(datetime);
+		return datetimestring;
 	}
 }

@@ -26,7 +26,7 @@ public class MachineReboot extends Loader {
 	private void rebootWindows() {
 		String command = "Restart-Computer -Force";
 		try {
-			System.out.println("Rebooting System in " + this.duration + "seconds. (Windows)");
+			System.out.println("Rebooting System in " + this.duration + "s. (Windows). (" + Logger.getCurrentDateTime() + ")");
 			Thread.sleep(this.duration * 1000);
 			execCommand(new ProcessBuilder("powershell.exe", command));
 		} catch (IOException | InterruptedException e) {
@@ -39,7 +39,7 @@ public class MachineReboot extends Loader {
 
 		String command = "shutdown -r now";
 		try {
-			System.out.println("Rebooting System in " + this.duration + "seconds. (Linux)");
+			System.out.println("Rebooting System in " + this.duration + "s. (Linux). (" + Logger.getCurrentDateTime() + ")");
 			Thread.sleep(this.duration * 1000);
 			execCommand(new ProcessBuilder("bash", "-c", command));
 		} catch (IOException | InterruptedException e) {
