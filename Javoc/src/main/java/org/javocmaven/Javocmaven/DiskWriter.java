@@ -51,7 +51,7 @@ public class DiskWriter extends Loader {
 		}
 	}
 
-	public void loadLinux(File diskpartition, File myObj, long totalspace, long freespace, long usedspace,
+	private void loadLinux(File diskpartition, File myObj, long totalspace, long freespace, long usedspace,
 			double usedpercent, double targetspace) {
 		double difference = targetspace - usedspace;
 		if (difference > 0) {
@@ -70,7 +70,7 @@ public class DiskWriter extends Loader {
 		}
 	}
 
-	public void loadWindows(File diskpartition, File myObj, long totalspace, long freespace, long usedspace,
+	private void loadWindows(File diskpartition, File myObj, long totalspace, long freespace, long usedspace,
 			double usedpercent, double targetspace) {
 		double difference = targetspace - usedspace;
 		try (RandomAccessFile file = new RandomAccessFile(myObj, "rws")) {

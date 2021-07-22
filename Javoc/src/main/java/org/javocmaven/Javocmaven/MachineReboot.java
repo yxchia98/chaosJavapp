@@ -7,6 +7,10 @@ import java.io.InputStreamReader;
 public class MachineReboot extends Loader {
 
 	private int duration = 0;
+	
+	public MachineReboot(int duration) {
+		this.duration = duration;
+	}
 
 	public MachineReboot(String[] arguments, int multiplier) {
 		if (arguments.length >= 1) {

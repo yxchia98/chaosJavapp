@@ -56,9 +56,7 @@ public class ResourceFile {
 		ZipEntry entry;
 		InputStream zipStream;
 		OutputStream fileStream;
-
-//		tempFile = File.createTempFile(fileName, Long.toString(System.currentTimeMillis()));
-//		tempFile = File.createTempFile(fileName, ".zip");
+		
 		tempFile = new File(fileName);
 		entry = zipFile.getEntry(fileName);
 
@@ -157,19 +155,6 @@ public class ResourceFile {
 
 		return normalizePath;
 	}
-
-//	protected static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-//		File destFile = new File(destinationDir, zipEntry.getName());
-//
-//		String destDirPath = destinationDir.getCanonicalPath();
-//		String destFilePath = destFile.getCanonicalPath();
-//
-//		if (!destFilePath.startsWith(destDirPath + File.separator)) {
-//			throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-//		}
-//
-//		return destFile;
-//	}
 
 	protected static void close(final Closeable stream) {
 		if (stream != null) {
