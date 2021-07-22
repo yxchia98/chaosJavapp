@@ -227,12 +227,4 @@ public class NetworkLagger extends Loader {
 		Thread.sleep(5000);
 	}
 
-//	private void deleteClumsy() throws IOException {
-//		File clumsyFolder = new File(this.folder);
-//		FileDeleteStrategy.FORCE.delete(new File(this.zipfilepath));
-//		for (File file : clumsyFolder.listFiles()) {
-//			FileDeleteStrategy.FORCE.delete(file);
-//		}
-//	}
-
 }

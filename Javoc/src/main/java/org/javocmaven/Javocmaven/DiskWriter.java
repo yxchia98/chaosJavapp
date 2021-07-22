@@ -26,7 +26,6 @@ public class DiskWriter extends Loader {
 	}
 
 	public void load() {
-//		System.out.println("Utilizing " + (int) this.utilization + "% of current partition.");
 		System.out.println("Utilizing Disk for " + this.duration + "s at " + this.utilization + "%. (" + Logger.getCurrentDateTime() + ")");
 		File diskpartition = new File("/");
 		long totalspace = diskpartition.getTotalSpace();

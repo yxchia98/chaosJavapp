@@ -32,17 +32,13 @@ public class MemoryLeaker extends Loader {
 		double totalmem = hal.getMemory().getTotal();
 
 		double targetMemory = this.utilization / 100 * totalmem;
-//		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20) + "\nTarget Memory usage: "
-//				+ targetMemory / Math.pow(2, 20));
+
 		ArrayList<char[]> hog = new ArrayList<char[]>();
 		Runtime.getRuntime().gc();
+		
 		while ((totalmem - hal.getMemory().getAvailable()) < targetMemory) {
 			hog.add(new char[52428800]);
 		}
-//		System.out.println();
-//		System.out.println("Total Memory: " + totalmem / Math.pow(2, 20));
-//		System.out.println("Free Memory: " + hal.getMemory().getAvailable() / Math.pow(2, 20));
-//		System.out.println("Used Memory: " + (totalmem - hal.getMemory().getAvailable()) / Math.pow(2, 20));
 		try {
 			Thread.sleep(this.duration * 1000);
 		} catch (InterruptedException e) {
