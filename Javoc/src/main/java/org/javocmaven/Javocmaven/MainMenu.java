@@ -48,17 +48,17 @@ public class MainMenu {
 			executeLoad(new DiskWriter(diskval, multiplier));
 		}
 		if(!(netlagval == null)) {
-			executeLoad(new NetworkLagger(netlagval, "lag", multiplier));
+			executeLoad(new NetworkEmulator(netlagval, "lag", multiplier));
 		}
 		if(!(netdropval == null)) {
 			System.out.println("-netdrop entered, " + (Integer.parseInt(netdropval[0]) * multiplier) + ", " + Integer.parseInt(netdropval[1]));
-			executeLoad(new NetworkLagger(netdropval, "drop", multiplier));
+			executeLoad(new NetworkEmulator(netdropval, "drop", multiplier));
 		}
 		if(!(netnoiseval == null)) {
-			executeLoad(new NetworkLagger(netnoiseval, "noise", multiplier));
+			executeLoad(new NetworkEmulator(netnoiseval, "noise", multiplier));
 		}
 		if(!(netlimitval == null)) {
-			executeLoad(new NetworkLagger(netlimitval, "throttle", multiplier));
+			executeLoad(new NetworkEmulator(netlimitval, "throttle", multiplier));
 		}
 		if(!(rebootval == null)) {
 			executeLoad(new MachineReboot(rebootval, multiplier));

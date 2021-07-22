@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.zip.ZipException;
 
-public class NetworkLagger extends Loader {
+public class NetworkEmulator extends Loader {
 
 	private int duration;
 	private double utilization;
@@ -15,12 +15,12 @@ public class NetworkLagger extends Loader {
 	private URI zipfile;
 	private String zipfilepath, folder;
 
-	public NetworkLagger(int duration, double utilization) {
+	public NetworkEmulator(int duration, double utilization) {
 		this.duration = duration;
 		this.utilization = utilization;
 	}
 
-	public NetworkLagger(String[] arguments, String type, int multiplier) {
+	public NetworkEmulator(String[] arguments, String type, int multiplier) {
 		this.type = type;
 		if (arguments.length >= 2) {
 			this.duration = Integer.parseInt(arguments[0]) * multiplier;
