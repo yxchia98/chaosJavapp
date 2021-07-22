@@ -6,8 +6,8 @@ import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 
 public class MemoryLeaker extends Loader {
-	int duration = 5;
-	double utilization = 50;
+	private int duration = 5;
+	private double utilization = 50;
 
 	public MemoryLeaker(int duration, double utilization) {
 		this.duration = duration;

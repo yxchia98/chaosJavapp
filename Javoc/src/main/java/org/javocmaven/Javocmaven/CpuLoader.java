@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class CpuLoader extends Loader {
-	int duration = 5;
-	double utilization = 50;
-	ArrayList<BusyThread> threadArray = new ArrayList<BusyThread>();
+	private int duration = 5;
+	private double utilization = 50;
+	private ArrayList<BusyThread> threadArray = new ArrayList<BusyThread>();
 
 	public CpuLoader(int duration, double utilization) {
 		this.duration = duration;

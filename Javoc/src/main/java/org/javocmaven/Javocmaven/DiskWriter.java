@@ -6,8 +6,8 @@ import java.io.RandomAccessFile;
 
 public class DiskWriter extends Loader {
 
-	int duration = 5;
-	double utilization = 20;
+	private int duration = 5;
+	private double utilization = 20;
 
 	public DiskWriter(int duration, double utilization) {
 		this.duration = duration;
