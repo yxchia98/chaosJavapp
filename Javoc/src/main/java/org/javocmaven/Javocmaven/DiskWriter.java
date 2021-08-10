@@ -22,11 +22,15 @@ public class DiskWriter extends Loader {
 			this.duration = Integer.parseInt(arguments[0]) * multiplier;
 		} else {
 		}
+		MainMenu.loadType = "Disk";
+		MainMenu.loadUtilization = String.valueOf(this.utilization);
+		MainMenu.loadDuration = String.valueOf(this.duration);
 
 	}
 
 	public void load() {
-		System.out.println("Utilizing Disk for " + this.duration + "s at " + this.utilization + "%. (" + Logger.getCurrentDateTime() + ")");
+		System.out.println("Utilizing Disk for " + this.duration + "s at " + this.utilization + "%. ("
+				+ Logger.getCurrentDateTime() + ")");
 		File diskpartition = new File("/");
 		long totalspace = diskpartition.getTotalSpace();
 		long freespace = diskpartition.getUsableSpace();

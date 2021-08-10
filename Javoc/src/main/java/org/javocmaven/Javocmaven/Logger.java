@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimerTask;
 
 import com.google.gson.GsonBuilder;
@@ -25,21 +26,23 @@ import oshi.SystemInfo;
 import oshi.hardware.HardwareAbstractionLayer;
 
 public class Logger extends TimerTask {
-	private String date, time, cpuload = " ", os, totalmem_string, usedmem_string, usedpercentmem_string,
-			totalspace_string, usedspace_string, usedpercentdisk_string;
+	private String date, time, cpuload = "", os, totalmem_string, usedmem_string, usedpercentmem_string,
+			totalspace_string, usedspace_string, usedpercentdisk_string, httpstatus = "", url = "";
 
 	public void run() {
-		File disklog = new File("/");
-		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		File disklog = new File("/"); // Specify root folder to get total amount of disk space
+		Timestamp ts = new Timestamp(System.currentTimeMillis());	//Get current time
 		
-		DecimalFormat df = new DecimalFormat("0.00");
+		DecimalFormat df = new DecimalFormat("0.00");	// Used to convert other types to double
 
+		// Get current log's date and time
 		Date datetime = new Date(ts.getTime());
 		DateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
 		DateFormat timeformat = new SimpleDateFormat("HH:mm:ss");
 		this.date = dateformat.format(datetime);
 		this.time = timeformat.format(datetime);
 
+		// Get current disk utilization
 		long totalspace = disklog.getTotalSpace();
 		long freespace = disklog.getUsableSpace();
 		long usedspace = totalspace - freespace;
@@ -48,6 +51,7 @@ public class Logger extends TimerTask {
 		this.usedspace_string = df.format(usedspace / Math.pow(2, 20));
 		this.usedpercentdisk_string = df.format(usedpercentdisk);
 
+		// Oshi to capture current memory utilization
 		SystemInfo si = new SystemInfo();
 		HardwareAbstractionLayer hal = si.getHardware();
 
@@ -59,25 +63,25 @@ public class Logger extends TimerTask {
 		this.usedmem_string = df.format(usedmem / Math.pow(2, 20));
 		this.usedpercentmem_string = df.format(usedpercentmem);
 
-		this.os = System.getProperty("os.name");
-
-		if (this.os.contains("Windows")) {
-			try {
-				this.cpuload = getCPU("Windows");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			try {
-				this.cpuload = getCPU("Linux");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		this.os = System.getProperty("os.name");	// Get operating system name, to execute respective windows/linux commands
+		
+		try {
+			this.cpuload = getCPU(os);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		// Check if there is a need for HTTP validation, and get HTTP status code for windows/linux
+		if (MainMenu.HTTPExperiment) {
+			this.url = MainMenu.url;
+			this.httpstatus = checkHTTPResponse(os, this.url);
 		}
 		exportTXT();
 		exportCSV();
 		exportJSON();
-
+		if(this.httpstatus.equals("Connection Failed.")) {
+			revertAndExit();
+		}
 	}
 
 	private void exportCSV() {
@@ -87,9 +91,9 @@ public class Logger extends TimerTask {
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 
-		String[] csvLog = { this.date, this.time, this.os, this.cpuload, this.totalmem_string, this.usedmem_string,
+		String[] csvLog = { this.date, this.time, this.os, MainMenu.loadType, MainMenu.loadUtilization, MainMenu.loadDuration, this.cpuload, this.totalmem_string, this.usedmem_string,
 				this.usedpercentmem_string, this.totalspace_string, this.usedspace_string,
-				this.usedpercentdisk_string };
+				this.usedpercentdisk_string, this.url, this.httpstatus };
 		if (file.exists()) {
 			// append to file
 			try {
@@ -106,8 +110,8 @@ public class Logger extends TimerTask {
 
 		} else {
 			// create new file and add headers before logging data
-			String[] header = { "Log Date", "Log Time", "Platform", "CPU Load(%)", "Total Memory(MB)",
-					"Used Memory(MB)", "Used Memory(%)", "Total Space(MB)", "Used Space(MB)", "Used Space(%)" };
+			String[] header = { "Log Date", "Log Time", "Platform", "Load Type", "Load Utilization", "Load Duration", "CPU Load(%)", "Total Memory(MB)",
+					"Used Memory(MB)", "Used Memory(%)", "Total Space(MB)", "Used Space(MB)", "Used Space(%)", "HTTP Validation URL", "HTTP Response" };
 			try {
 				CsvWriter csv = CsvWriter.builder().build(file.toPath(), StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE);
@@ -135,6 +139,9 @@ public class Logger extends TimerTask {
 		valuesmap.put("Log Date", this.date);
 		valuesmap.put("Log Time", this.time);
 		valuesmap.put("Platform", this.os);
+		valuesmap.put("Load Type", MainMenu.loadType);
+		valuesmap.put("Load Utlization", MainMenu.loadUtilization);
+		valuesmap.put("Load Duration", MainMenu.loadDuration);
 		valuesmap.put("CPU Load(%)", Double.parseDouble(this.cpuload));
 		valuesmap.put("Total Memory(MB)", Double.parseDouble(this.totalmem_string));
 		valuesmap.put("Used Memory(MB)", Double.parseDouble(this.usedmem_string) );
@@ -142,6 +149,8 @@ public class Logger extends TimerTask {
 		valuesmap.put("Total Disk(MB)", Double.parseDouble( this.totalspace_string));
 		valuesmap.put("Used Disk(MB)", Double.parseDouble(this.usedspace_string));
 		valuesmap.put("Used Disk(%)", Double.parseDouble(this.usedpercentdisk_string));
+		valuesmap.put("HTTP Validation URL", this.url);
+		valuesmap.put("HTTP Response", this.httpstatus);
 		GsonBuilder builder = new GsonBuilder();
 		builder.setPrettyPrinting();
 		String jsonData = builder.create().toJson(valuesmap);
@@ -178,6 +187,8 @@ public class Logger extends TimerTask {
 		logtxt += "LOG TIME: " + this.time + "\n";
 
 		logtxt += "Platform: " + this.os + "\n";
+		
+		logtxt += "Load Type: " + MainMenu.loadType + "\nLoad Utilization: " + MainMenu.loadUtilization + "\nLoad Duration: " + MainMenu.loadDuration + "\n";
 
 		logtxt += "CPU load: " + this.cpuload + "%\n";
 
@@ -187,7 +198,9 @@ public class Logger extends TimerTask {
 //		logtxt += "JVM Allocated Memory: " + jvmmem / Math.pow(2, 20) + "MB\n";
 
 		logtxt += "Total Space(100%): " + this.totalspace_string + "MB\nUsed Space(" + this.usedpercentdisk_string
-				+ "%): " + this.usedspace_string + "MB\n\n";
+				+ "%): " + this.usedspace_string + "MB\n";
+		
+		logtxt += "HTTP Validation URL: " + this.url + "\nHTTP Response: " + this.httpstatus + "\n\n";
 
 		File javoclog = new File(path);
 		FileOutputStream fos;
@@ -203,7 +216,7 @@ public class Logger extends TimerTask {
 	private String getCPU(String type) throws IOException {
 		String line = null;
 		ProcessBuilder builder = null;
-		if (type.equals("Windows")) {
+		if (type.contains("Windows")) {
 			builder = new ProcessBuilder("powershell.exe",
 					"Get-WmiObject -class win32_processor | Measure-Object -property LoadPercentage -Average | Select-Object -ExpandProperty Average");
 			builder.redirectErrorStream(true);
@@ -213,6 +226,7 @@ public class Logger extends TimerTask {
 			BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			while ((line = stdout.readLine()) != null) {
 				stdout.close();
+				p.destroy();
 				return line;
 			}
 			stdout.close();
@@ -220,6 +234,7 @@ public class Logger extends TimerTask {
 			BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 			while ((line = stderr.readLine()) != null) {
 				stderr.close();
+				p.destroy();
 				return line;
 			}
 		} else {
@@ -234,6 +249,7 @@ public class Logger extends TimerTask {
 			BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			while ((line = stdout.readLine()) != null) {
 				stdout.close();
+				p.destroy();
 				return line;
 			}
 			stdout.close();
@@ -241,6 +257,7 @@ public class Logger extends TimerTask {
 			BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 			while ((line = stderr.readLine()) != null) {
 				stderr.close();
+				p.destroy();
 				return line;
 			}
 		}
@@ -253,5 +270,90 @@ public class Logger extends TimerTask {
 		DateFormat datetimeformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String datetimestring = datetimeformat.format(datetime);
 		return datetimestring;
+	}
+	
+	private String checkHTTPResponse(String type, String url) {
+		String command;
+		String line = "";
+		ProcessBuilder builder;
+		if (type.contains("Windows")) {
+			try {
+				command = "add-type @\"\"\r\n" + "    using System.Net;\r\n"
+						+ "    using System.Security.Cryptography.X509Certificates;\r\n"
+						+ "    public class TrustAllCertsPolicy : ICertificatePolicy {\r\n"
+						+ "        public bool CheckValidationResult(\r\n"
+						+ "            ServicePoint srvPoint, X509Certificate certificate,\r\n"
+						+ "            WebRequest request, int certificateProblem) {\r\n"
+						+ "            return true;\r\n" + "        }\r\n" + "    }\r\n" + "\"\"\"@\r\n"
+						+ "[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy\r\n"
+						+ "\r\n" + "try{\r\n" + "$result = Invoke-WebRequest -Uri \"" + url + "\"\r\n"
+						+ "$statusCode = [int]$result.StatusCode\r\n" + "}\r\n" + "catch [System.Net.WebException]{\r\n"
+						+ "$statusCode = [int]$_.Exception.Response.StatusCode\r\n" + "}\r\n" + "echo $statusCode";
+				builder = new ProcessBuilder("powershell.exe", command);
+				builder.redirectErrorStream(true);
+				Process p = builder.start();
+				p.getOutputStream().close();
+				BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				while ((line = stdout.readLine()) != null) {
+					stdout.close();
+					p.destroy();
+					if (Objects.equals(line, "") || Objects.equals(line, "0")) {
+						line = "Connection Failed.";
+					}
+					return line;
+				}
+				stdout.close();
+				BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+				while ((line = stderr.readLine()) != null) {
+					stderr.close();
+					p.destroy();
+					if (Objects.equals(line, "") || Objects.equals(line, "0")) {
+						line = "Connection Failed.";
+					}
+					return line;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				command = "curl -I -k -s --max-time 10 " + url + " | grep HTTP | awk '{print $2}'";
+				builder = new ProcessBuilder("bash", "-c", command);
+				builder.redirectErrorStream(true);
+				Process p = builder.start();
+				p.getOutputStream().close();
+				BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				while ((line = stdout.readLine()) != null) {
+					stdout.close();
+					p.destroy();
+					if (Objects.equals(line, "") || Objects.equals(line, "0")) {
+						line = "Connection Failed.";
+					}
+					return line;
+				}
+				stdout.close();
+				BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+				while ((line = stderr.readLine()) != null) {
+					stderr.close();
+					p.destroy();
+					if (Objects.equals(line, "") || Objects.equals(line, "0")) {
+						line = "Connection Failed.";
+					}
+					return line;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (Objects.equals(line, "") || Objects.equals(line, "0")) {
+			line = "Connection Failed.";
+		}
+		return line;
+	}
+	
+	private void revertAndExit() {
+		System.out.println("Connection failed, exiting...");
+		System.exit(0);
+		return;
 	}
 }

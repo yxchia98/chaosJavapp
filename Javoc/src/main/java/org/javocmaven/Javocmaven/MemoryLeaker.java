@@ -18,10 +18,14 @@ public class MemoryLeaker extends Loader {
 		if (arguments.length >= 2) {
 			this.duration = Integer.parseInt(arguments[0]) * multiplier;
 			this.utilization = Double.parseDouble(arguments[1]);
+
 		} else if (arguments.length == 1) {
 			this.duration = Integer.parseInt(arguments[0]) * multiplier;
 		} else {
 		}
+		MainMenu.loadType = "Memory";
+		MainMenu.loadUtilization = String.valueOf(this.utilization);
+		MainMenu.loadDuration = String.valueOf(this.duration);
 
 	}
 

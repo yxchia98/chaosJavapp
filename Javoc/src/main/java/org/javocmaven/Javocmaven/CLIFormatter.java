@@ -1,8 +1,10 @@
 package org.javocmaven.Javocmaven;
 
+import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-public class CLIFormatter {
+@Command(mixinStandardHelpOptions = true, version = "1.0.1")
+public class CLIFormatter implements Runnable {
 
 	@Option(names = { "-seconds", "--seconds" })
 	private boolean seconds = false;
@@ -30,6 +32,13 @@ public class CLIFormatter {
 
 	@Option(names = { "-reboot", "--reboot" }, arity = "*")
 	private String[] rebootvalues;
+	
+	@Option(names = {"-url", "--url"}, arity = "*")
+	private String[] url;
+	
+	public String getUrl() {
+		return ((url == null) ? "" : url[0]);
+	}
 
 	public boolean isSeconds() {
 		return seconds;
@@ -65,6 +74,12 @@ public class CLIFormatter {
 
 	public String[] getRebootvalues() {
 		return rebootvalues;
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

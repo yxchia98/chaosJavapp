@@ -19,12 +19,18 @@ public class CpuLoader extends Loader {
 			this.utilization = Double.parseDouble(arguments[1]);
 		} else if (arguments.length == 1) {
 			this.duration = Integer.parseInt(arguments[0]) * multiplier;
+
 		} else {
+
 		}
+		MainMenu.loadType = "CPU";
+		MainMenu.loadUtilization = String.valueOf(this.utilization);
+		MainMenu.loadDuration = String.valueOf(this.duration);
 	}
 
 	public void load() {
-		System.out.println("Loading CPU for " + this.duration + "s at " + this.utilization + "%. (" + Logger.getCurrentDateTime() + ")");
+		System.out.println("Loading CPU for " + this.duration + "s at " + this.utilization + "%. ("
+				+ Logger.getCurrentDateTime() + ")");
 		int numCores = Runtime.getRuntime().availableProcessors();
 		LocalDateTime endtime = LocalDateTime.now().plusSeconds(this.duration);
 		for (int i = 0; i < numCores; i++) {

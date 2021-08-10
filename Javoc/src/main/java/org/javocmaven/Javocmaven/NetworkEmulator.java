@@ -29,6 +29,18 @@ public class NetworkEmulator extends Loader {
 			this.duration = Integer.parseInt(arguments[0]) * multiplier;
 		} else {
 		}
+		if (this.type.equals("lag")) {
+			MainMenu.loadType = "Network Packet Delay";			
+		} else if (this.type.equals("noise")) {
+			MainMenu.loadType = "Network Packet Duplicate";			
+
+		} else if (this.type.equals("drop")) {
+			MainMenu.loadType = "Network Packet Drop";			
+		} else if (this.type.equals("throttle")) {
+			MainMenu.loadType = "Network Bandwidth Throttling";			
+		}
+		MainMenu.loadUtilization = String.valueOf(this.utilization);
+		MainMenu.loadDuration = String.valueOf(this.duration);
 	}
 
 	public void load() {
