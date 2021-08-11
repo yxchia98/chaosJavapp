@@ -30,14 +30,14 @@ public class NetworkEmulator extends Loader {
 		} else {
 		}
 		if (this.type.equals("lag")) {
-			MainMenu.loadType = "Network Packet Delay";			
+			MainMenu.loadType = "Network Packet Delay";
 		} else if (this.type.equals("noise")) {
-			MainMenu.loadType = "Network Packet Duplicate";			
+			MainMenu.loadType = "Network Packet Duplicate";
 
 		} else if (this.type.equals("drop")) {
-			MainMenu.loadType = "Network Packet Drop";			
+			MainMenu.loadType = "Network Packet Drop";
 		} else if (this.type.equals("throttle")) {
-			MainMenu.loadType = "Network Bandwidth Throttling";			
+			MainMenu.loadType = "Network Bandwidth Throttling";
 		}
 		MainMenu.loadUtilization = String.valueOf(this.utilization);
 		MainMenu.loadDuration = String.valueOf(this.duration);
@@ -108,14 +108,17 @@ public class NetworkEmulator extends Loader {
 		}
 		String appPath = currentdir + "\\clumsy-0.3rc3-win64\\clumsy.exe";
 		String stop = "Stop-Process -Name 'clumsy'";
-		String lagtime = "Start-Sleep -s " + Integer.toString(this.duration);
+//		String lagtime = "Start-Sleep -s " + Integer.toString(this.duration);
 		String arguments = "--filter \"\"ip.DstAddr >= 0.0.0.0 \"\"\" --lag on --lag-inbound off --lag-outbound on --lag-time "
 				+ this.utilization;
 		String start = "Start-Process -WindowStyle Hidden " + appPath + " -ArgumentList '" + arguments + "'";
 //		System.out.println(dir);
 		try {
-			execCommand(new ProcessBuilder("powershell.exe", start, "\n", lagtime, "\n", stop));
-		} catch (IOException e) {
+//			execCommand(new ProcessBuilder("powershell.exe", start, "\n", lagtime, "\n", stop));
+			execCommand(new ProcessBuilder("powershell.exe", start));
+			Thread.sleep(duration * 1000);
+			execCommand(new ProcessBuilder("powershell.exe", stop));
+		} catch (IOException | InterruptedException e) {
 			System.out.println("Unable to execute command.");
 			e.printStackTrace();
 		}
@@ -129,6 +132,7 @@ public class NetworkEmulator extends Loader {
 			Thread.sleep(duration * 1000);
 			execCommand(new ProcessBuilder("bash", "-c", endcommand));
 		} catch (IOException | InterruptedException e) {
+			System.out.println("Unable to execute command.");
 			e.printStackTrace();
 		}
 	}
@@ -143,14 +147,16 @@ public class NetworkEmulator extends Loader {
 		}
 		String appPath = currentdir + "\\clumsy-0.3rc3-win64\\clumsy.exe";
 		String stop = "Stop-Process -Name 'clumsy'";
-		String lagtime = "Start-Sleep -s " + Integer.toString(this.duration);
+//		String lagtime = "Start-Sleep -s " + Integer.toString(this.duration);
 		String arguments = "--filter \"\"ip.DstAddr >= 0.0.0.0 \"\"\" --duplicate on --duplicate-inbound off --duplicate-outbound on --duplicate-count 2 --duplicate-chance "
 				+ this.utilization;
 		String start = "Start-Process -WindowStyle Hidden " + appPath + " -ArgumentList '" + arguments + "'";
 //		System.out.println(dir);
 		try {
-			execCommand(new ProcessBuilder("powershell.exe", start, "\n", lagtime, "\n", stop));
-		} catch (IOException e) {
+			execCommand(new ProcessBuilder("powershell.exe", start));
+			Thread.sleep(duration * 1000);
+			execCommand(new ProcessBuilder("powershell.exe", stop));
+		} catch (IOException | InterruptedException e) {
 			System.out.println("Unable to execute command.");
 			e.printStackTrace();
 		}
@@ -178,14 +184,16 @@ public class NetworkEmulator extends Loader {
 		}
 		String appPath = currentdir + "\\clumsy-0.3rc3-win64\\clumsy.exe";
 		String stop = "Stop-Process -Name 'clumsy'";
-		String lagtime = "Start-Sleep -s " + Integer.toString(this.duration);
+//		String lagtime = "Start-Sleep -s " + Integer.toString(this.duration);
 		String arguments = "--filter \"\"ip.DstAddr >= 0.0.0.0 \"\"\" --drop on --drop-outbound on --drop-inbound off --drop-chance "
 				+ this.utilization;
 		String start = "Start-Process -WindowStyle Hidden " + appPath + " -ArgumentList '" + arguments + "'";
 //		System.out.println(dir);
 		try {
-			execCommand(new ProcessBuilder("powershell.exe", start, "\n", lagtime, "\n", stop));
-		} catch (IOException e) {
+			execCommand(new ProcessBuilder("powershell.exe", start));
+			Thread.sleep(duration * 1000);
+			execCommand(new ProcessBuilder("powershell.exe", stop));
+		} catch (IOException | InterruptedException e) {
 			System.out.println("Unable to execute command.");
 			e.printStackTrace();
 		}
@@ -207,10 +215,12 @@ public class NetworkEmulator extends Loader {
 		String start = "New-NetQosPolicy -Name 'JavocPolicy' -Default -ThrottleRateActionBitsPerSecond "
 				+ this.utilization + "MB";
 		String stop = "Remove-NetQosPolicy -Name 'JavocPolicy' -Confirm:$false";
-		String lagtime = "Start-Sleep -s " + Integer.toString(this.duration);
+//		String lagtime = "Start-Sleep -s " + Integer.toString(this.duration);
 		try {
-			execCommand(new ProcessBuilder("powershell.exe", start, "\n", lagtime, "\n", stop));
-		} catch (IOException e) {
+			execCommand(new ProcessBuilder("powershell.exe", start));
+			Thread.sleep(duration * 1000);
+			execCommand(new ProcessBuilder("powershell.exe", stop));
+		} catch (IOException | InterruptedException e) {
 			System.out.println("Unable to execute command.");
 			e.printStackTrace();
 		}

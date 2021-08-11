@@ -27,13 +27,19 @@ import oshi.hardware.HardwareAbstractionLayer;
 
 public class Logger extends TimerTask {
 	private String date, time, cpuload = "", os, totalmem_string, usedmem_string, usedpercentmem_string,
-			totalspace_string, usedspace_string, usedpercentdisk_string, httpstatus = "", url = "";
+			totalspace_string, usedspace_string, usedpercentdisk_string, httpstatus = "", url = "", loadType,
+			loadDuration, loadUtilization;
 
 	public void run() {
+
+		// Get information on current chaos
+		this.loadType = MainMenu.loadType;
+		this.loadDuration = MainMenu.loadDuration;
+		this.loadUtilization = MainMenu.loadUtilization;
 		File disklog = new File("/"); // Specify root folder to get total amount of disk space
-		Timestamp ts = new Timestamp(System.currentTimeMillis());	//Get current time
-		
-		DecimalFormat df = new DecimalFormat("0.00");	// Used to convert other types to double
+		Timestamp ts = new Timestamp(System.currentTimeMillis()); // Get current time
+
+		DecimalFormat df = new DecimalFormat("0.00"); // Used to convert other types to double
 
 		// Get current log's date and time
 		Date datetime = new Date(ts.getTime());
@@ -63,15 +69,17 @@ public class Logger extends TimerTask {
 		this.usedmem_string = df.format(usedmem / Math.pow(2, 20));
 		this.usedpercentmem_string = df.format(usedpercentmem);
 
-		this.os = System.getProperty("os.name");	// Get operating system name, to execute respective windows/linux commands
-		
+		this.os = System.getProperty("os.name"); // Get operating system name, to execute respective windows/linux
+													// commands
+
 		try {
 			this.cpuload = getCPU(os);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		// Check if there is a need for HTTP validation, and get HTTP status code for windows/linux
+
+		// Check if there is a need for HTTP validation, and get HTTP status code for
+		// windows/linux
 		if (MainMenu.HTTPExperiment) {
 			this.url = MainMenu.url;
 			this.httpstatus = checkHTTPResponse(os, this.url);
@@ -79,7 +87,7 @@ public class Logger extends TimerTask {
 		exportTXT();
 		exportCSV();
 		exportJSON();
-		if(this.httpstatus.equals("Connection Failed.")) {
+		if (this.httpstatus.equals("Connection Failed.")) {
 			revertAndExit();
 		}
 	}
@@ -91,9 +99,9 @@ public class Logger extends TimerTask {
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 
-		String[] csvLog = { this.date, this.time, this.os, MainMenu.loadType, MainMenu.loadUtilization, MainMenu.loadDuration, this.cpuload, this.totalmem_string, this.usedmem_string,
-				this.usedpercentmem_string, this.totalspace_string, this.usedspace_string,
-				this.usedpercentdisk_string, this.url, this.httpstatus };
+		String[] csvLog = { this.date, this.time, this.os, this.loadType, this.loadUtilization, this.loadDuration,
+				this.cpuload, this.totalmem_string, this.usedmem_string, this.usedpercentmem_string,
+				this.totalspace_string, this.usedspace_string, this.usedpercentdisk_string, this.url, this.httpstatus };
 		if (file.exists()) {
 			// append to file
 			try {
@@ -110,8 +118,9 @@ public class Logger extends TimerTask {
 
 		} else {
 			// create new file and add headers before logging data
-			String[] header = { "Log Date", "Log Time", "Platform", "Load Type", "Load Utilization", "Load Duration", "CPU Load(%)", "Total Memory(MB)",
-					"Used Memory(MB)", "Used Memory(%)", "Total Space(MB)", "Used Space(MB)", "Used Space(%)", "HTTP Validation URL", "HTTP Response" };
+			String[] header = { "Log Date", "Log Time", "Platform", "Load Type", "Load Utilization", "Load Duration",
+					"CPU Load(%)", "Total Memory(MB)", "Used Memory(MB)", "Used Memory(%)", "Total Space(MB)",
+					"Used Space(MB)", "Used Space(%)", "HTTP Validation URL", "HTTP Response" };
 			try {
 				CsvWriter csv = CsvWriter.builder().build(file.toPath(), StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE);
@@ -139,14 +148,14 @@ public class Logger extends TimerTask {
 		valuesmap.put("Log Date", this.date);
 		valuesmap.put("Log Time", this.time);
 		valuesmap.put("Platform", this.os);
-		valuesmap.put("Load Type", MainMenu.loadType);
-		valuesmap.put("Load Utlization", MainMenu.loadUtilization);
-		valuesmap.put("Load Duration", MainMenu.loadDuration);
+		valuesmap.put("Load Type", this.loadType);
+		valuesmap.put("Load Utlization", this.loadUtilization);
+		valuesmap.put("Load Duration", this.loadDuration);
 		valuesmap.put("CPU Load(%)", Double.parseDouble(this.cpuload));
 		valuesmap.put("Total Memory(MB)", Double.parseDouble(this.totalmem_string));
-		valuesmap.put("Used Memory(MB)", Double.parseDouble(this.usedmem_string) );
+		valuesmap.put("Used Memory(MB)", Double.parseDouble(this.usedmem_string));
 		valuesmap.put("Used Memory(%)", Double.parseDouble(this.usedpercentmem_string));
-		valuesmap.put("Total Disk(MB)", Double.parseDouble( this.totalspace_string));
+		valuesmap.put("Total Disk(MB)", Double.parseDouble(this.totalspace_string));
 		valuesmap.put("Used Disk(MB)", Double.parseDouble(this.usedspace_string));
 		valuesmap.put("Used Disk(%)", Double.parseDouble(this.usedpercentdisk_string));
 		valuesmap.put("HTTP Validation URL", this.url);
@@ -187,8 +196,9 @@ public class Logger extends TimerTask {
 		logtxt += "LOG TIME: " + this.time + "\n";
 
 		logtxt += "Platform: " + this.os + "\n";
-		
-		logtxt += "Load Type: " + MainMenu.loadType + "\nLoad Utilization: " + MainMenu.loadUtilization + "\nLoad Duration: " + MainMenu.loadDuration + "\n";
+
+		logtxt += "Load Type: " + this.loadType + "\nLoad Utilization: " + this.loadUtilization + "\nLoad Duration: "
+				+ this.loadDuration + "\n";
 
 		logtxt += "CPU load: " + this.cpuload + "%\n";
 
@@ -199,7 +209,7 @@ public class Logger extends TimerTask {
 
 		logtxt += "Total Space(100%): " + this.totalspace_string + "MB\nUsed Space(" + this.usedpercentdisk_string
 				+ "%): " + this.usedspace_string + "MB\n";
-		
+
 		logtxt += "HTTP Validation URL: " + this.url + "\nHTTP Response: " + this.httpstatus + "\n\n";
 
 		File javoclog = new File(path);
@@ -263,7 +273,7 @@ public class Logger extends TimerTask {
 		}
 		return line;
 	}
-	
+
 	public static String getCurrentDateTime() {
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		Date datetime = new Date(ts.getTime());
@@ -271,7 +281,7 @@ public class Logger extends TimerTask {
 		String datetimestring = datetimeformat.format(datetime);
 		return datetimestring;
 	}
-	
+
 	private String checkHTTPResponse(String type, String url) {
 		String command;
 		String line = "";
@@ -350,9 +360,22 @@ public class Logger extends TimerTask {
 		}
 		return line;
 	}
-	
+
 	private void revertAndExit() {
-		System.out.println("Connection failed, exiting...");
+		System.out.println("Validation failed, refer to logs for further information.\nLoad Type: " + this.loadType
+				+ "\nLoad Utilization: " + this.loadUtilization + "\nLoad Duration: " + this.loadDuration + "\nReverting and exiting...");
+		if (MainMenu.loadType.equals("Network Packet Delay")) {
+			
+		}
+		if (MainMenu.loadType.equals("Network Packet Duplicate")) {
+			
+		}
+		if (MainMenu.loadType.equals("Network Packet Drop")) {
+			
+		}
+		if (MainMenu.loadType.equals("Network Bandwidth Throttling")) {
+			
+		}
 		System.exit(0);
 		return;
 	}

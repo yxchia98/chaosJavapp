@@ -38,7 +38,6 @@ public class MemoryLeaker extends Loader {
 		double targetMemory = this.utilization / 100 * totalmem;
 
 		ArrayList<char[]> hog = new ArrayList<char[]>();
-		Runtime.getRuntime().gc();
 		
 		while ((totalmem - hal.getMemory().getAvailable()) < targetMemory) {
 			hog.add(new char[52428800]);
@@ -49,6 +48,7 @@ public class MemoryLeaker extends Loader {
 			e.printStackTrace();
 			System.out.println("Error putting thread to sleep");
 		}
+		hog.clear();
 
 	}
 }
