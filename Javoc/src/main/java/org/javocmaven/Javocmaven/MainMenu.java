@@ -7,7 +7,9 @@ import picocli.CommandLine;
 
 public class MainMenu {
 	
-	public static String currentState = "", url, loadType = "None", loadUtilization = "None", loadDuration = "None";
+	public static String currentState = "", url, loadType = "None";
+	public static int loadDuration = 0;
+	public static double loadUtilization = 0;
 	public static boolean HTTPExperiment = false;
 
 	private static void executeLoad(Loader loadObj) {

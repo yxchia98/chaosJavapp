@@ -39,8 +39,8 @@ public class NetworkEmulator extends Loader {
 		} else if (this.type.equals("throttle")) {
 			MainMenu.loadType = "Network Bandwidth Throttling";
 		}
-		MainMenu.loadUtilization = String.valueOf(this.utilization);
-		MainMenu.loadDuration = String.valueOf(this.duration);
+		MainMenu.loadUtilization = this.utilization;
+		MainMenu.loadDuration = this.duration;
 	}
 
 	public void load() {
@@ -247,6 +247,92 @@ public class NetworkEmulator extends Loader {
 		this.folder = ResourceFile.getJarDir();
 		ResourceFile.unzipFolder(this.zipfilepath, this.folder);
 		Thread.sleep(5000);
+	}
+
+	protected static void stopLag(String operatingSystem, double utilization) {
+		String stop;
+		if (operatingSystem.contains("Windows")) {
+			stop = "Stop-Process -Name 'clumsy'";
+			try {
+				execCommand(new ProcessBuilder("powershell.exe", stop));
+			} catch (IOException e) {
+				System.out.println("Unable to execute command.");
+				e.printStackTrace();
+			}
+
+		} else if (operatingSystem.contains("Linux")) {
+			stop = "tc qdisc del dev ens192 root netem delay " + utilization + "ms";
+			try {
+				execCommand(new ProcessBuilder("bash", "-c", stop));
+			} catch (IOException e) {
+				System.out.println("Unable to execute command.");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected static void stopNoise(String operatingSystem, double utilization) {
+		String stop;
+		if (operatingSystem.contains("Windows")) {
+			stop = "Stop-Process -Name 'clumsy'";
+			try {
+				execCommand(new ProcessBuilder("powershell.exe", stop));
+			} catch (IOException e) {
+				System.out.println("Unable to execute command.");
+				e.printStackTrace();
+			}
+		} else if (operatingSystem.contains("Linux")) {
+			stop = "tc qdisc del dev ens192 root netem duplicate " + utilization + "%";
+			try {
+				execCommand(new ProcessBuilder("bash", "-c", stop));
+			} catch (IOException e) {
+				System.out.println("Unable to execute command.");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected static void stopDrop(String operatingSystem, double utilization) {
+		String stop;
+		if (operatingSystem.contains("Windows")) {
+			stop = "Stop-Process -Name 'clumsy'";
+			try {
+				execCommand(new ProcessBuilder("powershell.exe", stop));
+			} catch (IOException e) {
+				System.out.println("Unable to execute command.");
+				e.printStackTrace();
+			}
+		} else if (operatingSystem.contains("Linux")) {
+			stop = "tc qdisc del dev ens192 root netem loss " + utilization + "%";
+			try {
+				execCommand(new ProcessBuilder("bash", "-c", stop));
+			} catch (IOException e) {
+				System.out.println("Unable to execute command.");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected static void stopThrottle(String operatingSystem, double utilization) {
+		String stop;
+		if (operatingSystem.contains("Windows")) {
+			stop = "Remove-NetQosPolicy -Name 'JavocPolicy' -Confirm:$false";
+			try {
+				execCommand(new ProcessBuilder("powershell.exe", stop));
+			} catch (IOException e) {
+				System.out.println("Unable to execute command.");
+				e.printStackTrace();
+			}
+		} else if (operatingSystem.contains("Linux")) {
+			double Mbits = utilization * Math.pow(2, 20) / Math.pow(10, 6);
+			stop = "tc qdisc del dev ens192 root tbf rate " + Mbits + "Mbit burst " + Mbits + "mb latency 1000ms";
+			try {
+				execCommand(new ProcessBuilder("bash", "-c", stop));
+			} catch (IOException e) {
+				System.out.println("Unable to execute command.");
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

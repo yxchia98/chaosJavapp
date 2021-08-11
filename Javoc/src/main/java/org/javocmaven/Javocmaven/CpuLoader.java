@@ -24,8 +24,8 @@ public class CpuLoader extends Loader {
 
 		}
 		MainMenu.loadType = "CPU";
-		MainMenu.loadUtilization = String.valueOf(this.utilization);
-		MainMenu.loadDuration = String.valueOf(this.duration);
+		MainMenu.loadUtilization = this.utilization;
+		MainMenu.loadDuration = this.duration;
 	}
 
 	public void load() {

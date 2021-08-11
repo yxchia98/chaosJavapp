@@ -23,8 +23,8 @@ public class DiskWriter extends Loader {
 		} else {
 		}
 		MainMenu.loadType = "Disk";
-		MainMenu.loadUtilization = String.valueOf(this.utilization);
-		MainMenu.loadDuration = String.valueOf(this.duration);
+		MainMenu.loadUtilization = this.utilization;
+		MainMenu.loadDuration = this.duration;
 
 	}
 
@@ -62,7 +62,7 @@ public class DiskWriter extends Loader {
 			// execute code here
 			String startcommand = "fallocate -l " + Math.round(difference) + " hogger.txt";
 			try {
-				this.execCommand(new ProcessBuilder("bash", "-c", startcommand));
+				execCommand(new ProcessBuilder("bash", "-c", startcommand));
 				System.out.println("Injected hogger.txt of " + Math.round(difference / Math.pow(2, 20)) + "MB");
 				Thread.sleep(duration * 1000);
 				myObj.delete();

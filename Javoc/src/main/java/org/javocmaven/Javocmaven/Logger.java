@@ -32,14 +32,15 @@ public class Logger extends TimerTask {
 
 	public void run() {
 
-		// Get information on current chaos
-		this.loadType = MainMenu.loadType;
-		this.loadDuration = MainMenu.loadDuration;
-		this.loadUtilization = MainMenu.loadUtilization;
 		File disklog = new File("/"); // Specify root folder to get total amount of disk space
 		Timestamp ts = new Timestamp(System.currentTimeMillis()); // Get current time
 
 		DecimalFormat df = new DecimalFormat("0.00"); // Used to convert other types to double
+		
+		// Get information on current chaos
+		this.loadType = MainMenu.loadType;
+		this.loadDuration = df.format(MainMenu.loadDuration);
+		this.loadUtilization = df.format(MainMenu.loadUtilization);
 
 		// Get current log's date and time
 		Date datetime = new Date(ts.getTime());
@@ -87,7 +88,8 @@ public class Logger extends TimerTask {
 		exportTXT();
 		exportCSV();
 		exportJSON();
-		if (this.httpstatus.equals("Connection Failed.")) {
+		if (this.httpstatus.equals("Connection Failed.") || this.httpstatus.charAt(0) == '4' || this.httpstatus.charAt(0) == '5') {
+			System.out.println("Failed to establish connection to \"" + this.url + "\".");
 			revertAndExit();
 		}
 	}
@@ -149,8 +151,8 @@ public class Logger extends TimerTask {
 		valuesmap.put("Log Time", this.time);
 		valuesmap.put("Platform", this.os);
 		valuesmap.put("Load Type", this.loadType);
-		valuesmap.put("Load Utlization", this.loadUtilization);
-		valuesmap.put("Load Duration", this.loadDuration);
+		valuesmap.put("Load Utlization", Double.parseDouble(this.loadUtilization));
+		valuesmap.put("Load Duration", Math.round(Double.parseDouble(this.loadDuration)));
 		valuesmap.put("CPU Load(%)", Double.parseDouble(this.cpuload));
 		valuesmap.put("Total Memory(MB)", Double.parseDouble(this.totalmem_string));
 		valuesmap.put("Used Memory(MB)", Double.parseDouble(this.usedmem_string));
@@ -247,7 +249,7 @@ public class Logger extends TimerTask {
 				p.destroy();
 				return line;
 			}
-		} else {
+		} else if (type.contains("Linux")) {
 			builder = new ProcessBuilder("bash", "-c",
 					"top -bn1 | grep -Po \"[0-9.]*(?=( id,))\" | awk '{print 100 - $1}'");
 //			builder = new ProcessBuilder("bash", "-c",
@@ -355,7 +357,7 @@ public class Logger extends TimerTask {
 				e.printStackTrace();
 			}
 		}
-		if (Objects.equals(line, "") || Objects.equals(line, "0")) {
+		if (Objects.equals(line, "") || Objects.equals(line, "0") || Objects.equals(line, null)) {
 			line = "Connection Failed.";
 		}
 		return line;
@@ -365,16 +367,16 @@ public class Logger extends TimerTask {
 		System.out.println("Validation failed, refer to logs for further information.\nLoad Type: " + this.loadType
 				+ "\nLoad Utilization: " + this.loadUtilization + "\nLoad Duration: " + this.loadDuration + "\nReverting and exiting...");
 		if (MainMenu.loadType.equals("Network Packet Delay")) {
-			
+			NetworkEmulator.stopLag(this.os, MainMenu.loadUtilization);
 		}
 		if (MainMenu.loadType.equals("Network Packet Duplicate")) {
-			
+			NetworkEmulator.stopNoise(this.os, MainMenu.loadUtilization);
 		}
 		if (MainMenu.loadType.equals("Network Packet Drop")) {
-			
+			NetworkEmulator.stopDrop(this.os, MainMenu.loadUtilization);
 		}
 		if (MainMenu.loadType.equals("Network Bandwidth Throttling")) {
-			
+			NetworkEmulator.stopThrottle(this.os, MainMenu.loadUtilization);
 		}
 		System.exit(0);
 		return;

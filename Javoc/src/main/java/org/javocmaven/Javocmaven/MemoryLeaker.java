@@ -24,8 +24,8 @@ public class MemoryLeaker extends Loader {
 		} else {
 		}
 		MainMenu.loadType = "Memory";
-		MainMenu.loadUtilization = String.valueOf(this.utilization);
-		MainMenu.loadDuration = String.valueOf(this.duration);
+		MainMenu.loadUtilization = this.utilization;
+		MainMenu.loadDuration = this.duration;
 
 	}
 

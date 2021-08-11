@@ -51,7 +51,7 @@ public class MachineReboot extends Loader {
 		}
 	}
 
-	protected void execCommand(ProcessBuilder builder) throws IOException {
+	protected static void execCommand(ProcessBuilder builder) throws IOException {
 		builder.redirectErrorStream(true);
 		Process p = builder.start();
 		p.getOutputStream().close();
