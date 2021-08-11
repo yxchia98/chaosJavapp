@@ -18,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.TimerTask;
-
 import com.google.gson.GsonBuilder;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
@@ -28,7 +27,7 @@ import oshi.hardware.HardwareAbstractionLayer;
 public class Logger extends TimerTask {
 	private String date, time, cpuload = "", os, totalmem_string, usedmem_string, usedpercentmem_string,
 			totalspace_string, usedspace_string, usedpercentdisk_string, httpstatus = "", url = "", loadType,
-			loadDuration, loadUtilization;
+			loadDuration, loadUtilization, service = "", validateService = "";
 
 	public void run() {
 
@@ -84,21 +83,37 @@ public class Logger extends TimerTask {
 		if (MainMenu.HTTPExperiment) {
 			this.url = MainMenu.url;
 			this.httpstatus = checkHTTPResponse(os, this.url);
-			exportTXT();
-			exportCSV();
-			exportJSON();
 			if (this.httpstatus.equals("Connection Failed.") || this.httpstatus.charAt(0) == '4'
 					|| this.httpstatus.charAt(0) == '5') {
 				System.out.println("Failed to establish connection to \"" + this.url + "\".");
 				revertAndExit();
 			}
 		}
-		else {
-			exportTXT();
-			exportCSV();
-			exportJSON();
+		if (MainMenu.ServiceExperiment) {
+			this.service = MainMenu.service;
+			ArrayList<String> services = getSerivces(os);
+			for (String str : services) {
+				if(processRegionMatches(str, this.service)) {
+					this.validateService = "Success";
+					break;
+				}
+			}
+			if(!this.validateService.equals("Success")) {
+				this.validateService = "Failed";
+				System.out.println("Requested service \"" + this.service + "\" is not running on the system.");
+				revertAndExit();
+			}
 		}
-
+		exportTXT();
+		exportCSV();
+		exportJSON();
+	}
+	
+	private boolean processRegionMatches(String str, String substr) {
+	    for (int i = str.length() - substr.length(); i >= 0; i--) 
+	        if (str.regionMatches(true, i, substr, 0, substr.length())) 
+	            return true; 
+	    return false;
 	}
 
 	private void exportCSV() {
@@ -129,7 +144,7 @@ public class Logger extends TimerTask {
 			// create new file and add headers before logging data
 			String[] header = { "Log Date", "Log Time", "Platform", "Load Type", "Load Utilization", "Load Duration",
 					"CPU Load(%)", "Total Memory(MB)", "Used Memory(MB)", "Used Memory(%)", "Total Space(MB)",
-					"Used Space(MB)", "Used Space(%)", "HTTP Validation URL", "HTTP Response" };
+					"Used Space(MB)", "Used Space(%)", "HTTP Validation URL", "HTTP Response", "Service", "Service Validation" };
 			try {
 				CsvWriter csv = CsvWriter.builder().build(file.toPath(), StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE);
@@ -169,6 +184,8 @@ public class Logger extends TimerTask {
 		valuesmap.put("Used Disk(%)", Double.parseDouble(this.usedpercentdisk_string));
 		valuesmap.put("HTTP Validation URL", this.url);
 		valuesmap.put("HTTP Response", this.httpstatus);
+		valuesmap.put("Service", this.service);
+		valuesmap.put("Service Validation", this.validateService);
 		GsonBuilder builder = new GsonBuilder();
 		builder.setPrettyPrinting();
 		String jsonData = builder.create().toJson(valuesmap);
@@ -219,7 +236,9 @@ public class Logger extends TimerTask {
 		logtxt += "Total Space(100%): " + this.totalspace_string + "MB\nUsed Space(" + this.usedpercentdisk_string
 				+ "%): " + this.usedspace_string + "MB\n";
 
-		logtxt += "HTTP Validation URL: " + this.url + "\nHTTP Response: " + this.httpstatus + "\n\n";
+		logtxt += "HTTP Validation URL: " + this.url + "\nHTTP Response: " + this.httpstatus + "\n";
+		
+		logtxt += "Service: " + this.service + "\nService Validation: " + this.validateService + "\n\n";
 
 		File javoclog = new File(path);
 		FileOutputStream fos;
@@ -232,10 +251,10 @@ public class Logger extends TimerTask {
 		}
 	}
 
-	private String getCPU(String type) throws IOException {
+	private String getCPU(String operatingSystem) throws IOException {
 		String line = null;
 		ProcessBuilder builder = null;
-		if (type.contains("Windows")) {
+		if (operatingSystem.contains("Windows")) {
 			builder = new ProcessBuilder("powershell.exe",
 					"Get-WmiObject -class win32_processor | Measure-Object -property LoadPercentage -Average | Select-Object -ExpandProperty Average");
 			builder.redirectErrorStream(true);
@@ -256,7 +275,7 @@ public class Logger extends TimerTask {
 				p.destroy();
 				return line;
 			}
-		} else if (type.contains("Linux")) {
+		} else if (operatingSystem.contains("Linux")) {
 			builder = new ProcessBuilder("bash", "-c",
 					"top -bn1 | grep -Po \"[0-9.]*(?=( id,))\" | awk '{print 100 - $1}'");
 //			builder = new ProcessBuilder("bash", "-c",
@@ -370,7 +389,72 @@ public class Logger extends TimerTask {
 		return line;
 	}
 
+	private ArrayList<String> getSerivces(String operatingSystem) {
+		ArrayList<String> serviceList = new ArrayList<>();
+		if (operatingSystem.contains("Windows")) {
+			String command = "Get-Service | Where-Object {$_.Status -eq \"\"Running\"\"\"} | Format-Table -Property Name -HideTableHeaders";
+			try {
+				ProcessBuilder builder = new ProcessBuilder("powershell.exe", command);
+				builder.redirectErrorStream(true);
+				Process p = builder.start();
+				p.getOutputStream().close();
+				String line;
+				// Standard Output
+				BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				while ((line = stdout.readLine()) != null) {
+					if (!line.equals("")) {
+						serviceList.add(line);
+					}
+
+				}
+				stdout.close();
+				// Standard Error
+				BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+				while ((line = stderr.readLine()) != null) {
+					System.out.println(line);
+				}
+				stderr.close();
+				p.destroy();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (operatingSystem.contains("Linux")) {
+			String command = "systemctl --type=service --no-legend | grep running | awk '{print $1}'";
+			try {
+				ProcessBuilder builder = new ProcessBuilder("bash", "-c", command);
+				builder.redirectErrorStream(true);
+				Process p = builder.start();
+				p.getOutputStream().close();
+				String line;
+				// Standard Output
+				BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				while ((line = stdout.readLine()) != null) {
+					if (!line.equals("")) {
+						serviceList.add(line);
+					}
+
+				}
+				stdout.close();
+				// Standard Error
+				BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+				while ((line = stderr.readLine()) != null) {
+					System.out.println(line);
+				}
+				stderr.close();
+				p.destroy();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return serviceList;
+	}
+
 	private void revertAndExit() {
+		exportTXT();
+		exportCSV();
+		exportJSON();
 		System.out.println("Validation failed, refer to logs for further information.\nLoad Type: " + this.loadType
 				+ "\nLoad Utilization: " + this.loadUtilization + "\nLoad Duration: " + this.loadDuration
 				+ "\nReverting and exiting...");

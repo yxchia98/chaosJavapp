@@ -7,10 +7,10 @@ import picocli.CommandLine;
 
 public class MainMenu {
 	
-	public static String url, loadType = "None";
+	public static String url, service, loadType = "None";
 	public static int loadDuration = 0;
 	public static double loadUtilization = 0;
-	public static boolean HTTPExperiment = false;
+	public static boolean HTTPExperiment = false, ServiceExperiment = false;
 
 	private static void executeLoad(Loader loadObj) {
 		loadObj.load();
@@ -30,8 +30,12 @@ public class MainMenu {
 		String[] netlimitval = arguments.getNetlimitvalues();
 		String[] rebootval = arguments.getRebootvalues();
 		url = arguments.getUrl();
+		service = arguments.getService();
 		if(!url.equals("")) {
 			HTTPExperiment = true;
+		}
+		if(!service.equals("")) {
+			ServiceExperiment = true;
 		}
 		int multiplier = 60;
 
