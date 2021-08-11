@@ -6,34 +6,34 @@ import picocli.CommandLine.Option;
 @Command(mixinStandardHelpOptions = true, version = "1.0.1")
 public class CLIFormatter implements Runnable {
 
-	@Option(names = { "-seconds", "--seconds" })
+	@Option(names = { "-seconds", "--seconds" }, description = "Evaluate duration as seconds instead of minutes")
 	private boolean seconds = false;
 
-	@Option(names = { "-cpu", "--cpu" }, arity = "*")
+	@Option(names = { "-cpu", "--cpu" }, arity = "*", description = "Load CPU for <duration> <utilization%>")
 	private String[] cpuvalues;
 
-	@Option(names = { "-mem", "--mem" }, arity = "*")
+	@Option(names = { "-mem", "--mem" }, arity = "*", description = "Load Memory for <duration> <utilization%>")
 	private String[] memvalues;
 
-	@Option(names = { "-disk", "--disk" }, arity = "*")
+	@Option(names = { "-disk", "--disk" }, arity = "*", description = "Load Disk for <duration> <utilization%> on root volume")
 	private String[] diskvalues;
 
-	@Option(names = { "-netlag", "--netlag" }, arity = "*")
+	@Option(names = { "-netlag", "--netlag" }, arity = "*", description = "Network Packet Delay for <duration> <utilization in ms>")
 	private String[] netlagvalues;
 
-	@Option(names = { "-netnoise", "--netnoise" }, arity = "*")
+	@Option(names = { "-netnoise", "--netnoise" }, arity = "*", description = "Duplicate Network Packets for <duration> <duplication%>")
 	private String[] netnoisevalues;
 
-	@Option(names = { "-netdrop", "--netdrop" }, arity = "*")
+	@Option(names = { "-netdrop", "--netdrop" }, arity = "*", description = "Drop Network Packets for <duration> <packetloss%>")
 	private String[] netdropvalues;
 
-	@Option(names = { "-netlimit", "--netlimit" }, arity = "*")
+	@Option(names = { "-netlimit", "--netlimit" }, arity = "*", description = "Network Bandwidth Throttling for <duration> <utilization in MB/s>")
 	private String[] netlimitvalues;
 
-	@Option(names = { "-reboot", "--reboot" }, arity = "*")
+	@Option(names = { "-reboot", "--reboot" }, arity = "*", description = "Reboot system after <duration>")
 	private String[] rebootvalues;
 	
-	@Option(names = {"-url", "--url"}, arity = "*")
+	@Option(names = {"-url", "--url"}, arity = "*", description = "URL for validation of Experiments <url>")
 	private String[] url;
 	
 	public String getUrl() {

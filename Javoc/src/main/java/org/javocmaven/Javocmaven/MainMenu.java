@@ -7,7 +7,7 @@ import picocli.CommandLine;
 
 public class MainMenu {
 	
-	public static String currentState = "", url, loadType = "None";
+	public static String url, loadType = "None";
 	public static int loadDuration = 0;
 	public static double loadUtilization = 0;
 	public static boolean HTTPExperiment = false;
@@ -79,8 +79,6 @@ public class MainMenu {
 		}
 		// Execute network packet drop if -netdrop option is parsed, along with duration and %drop positional parameters.
 		if (!(netdropval == null)) {
-			System.out.println("-netdrop entered, " + (Integer.parseInt(netdropval[0]) * multiplier) + ", "
-					+ Integer.parseInt(netdropval[1]));
 			executeLoad(new NetworkEmulator(netdropval, "drop", multiplier));
 		}
 		// Execute network packet duplication if -netnoise option is parsed, along with duration and % of packets to be duplicated positional parameters.
@@ -95,6 +93,11 @@ public class MainMenu {
 		if (!(rebootval == null)) {
 			executeLoad(new MachineReboot(rebootval, multiplier));
 		}
+		
+		// Reset current load type to None after completing all experiments
+		MainMenu.loadType = "None";
+		MainMenu.loadDuration = 0;
+		MainMenu.loadUtilization = 0;
 
 		// Join all busythreads before termination
 		for (int i = 0; i < threadArray.size(); i++) {

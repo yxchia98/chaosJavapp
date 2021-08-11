@@ -36,7 +36,7 @@ public class Logger extends TimerTask {
 		Timestamp ts = new Timestamp(System.currentTimeMillis()); // Get current time
 
 		DecimalFormat df = new DecimalFormat("0.00"); // Used to convert other types to double
-		
+
 		// Get information on current chaos
 		this.loadType = MainMenu.loadType;
 		this.loadDuration = df.format(MainMenu.loadDuration);
@@ -84,14 +84,21 @@ public class Logger extends TimerTask {
 		if (MainMenu.HTTPExperiment) {
 			this.url = MainMenu.url;
 			this.httpstatus = checkHTTPResponse(os, this.url);
+			exportTXT();
+			exportCSV();
+			exportJSON();
+			if (this.httpstatus.equals("Connection Failed.") || this.httpstatus.charAt(0) == '4'
+					|| this.httpstatus.charAt(0) == '5') {
+				System.out.println("Failed to establish connection to \"" + this.url + "\".");
+				revertAndExit();
+			}
 		}
-		exportTXT();
-		exportCSV();
-		exportJSON();
-		if (this.httpstatus.equals("Connection Failed.") || this.httpstatus.charAt(0) == '4' || this.httpstatus.charAt(0) == '5') {
-			System.out.println("Failed to establish connection to \"" + this.url + "\".");
-			revertAndExit();
+		else {
+			exportTXT();
+			exportCSV();
+			exportJSON();
 		}
+
 	}
 
 	private void exportCSV() {
@@ -298,7 +305,7 @@ public class Logger extends TimerTask {
 						+ "            WebRequest request, int certificateProblem) {\r\n"
 						+ "            return true;\r\n" + "        }\r\n" + "    }\r\n" + "\"\"\"@\r\n"
 						+ "[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy\r\n"
-						+ "\r\n" + "try{\r\n" + "$result = Invoke-WebRequest -Uri \"" + url + "\"\r\n"
+						+ "\r\n" + "try{\r\n" + "$result = Invoke-WebRequest -Uri \"" + url + "\" -TimeoutSec 12\r\n"
 						+ "$statusCode = [int]$result.StatusCode\r\n" + "}\r\n" + "catch [System.Net.WebException]{\r\n"
 						+ "$statusCode = [int]$_.Exception.Response.StatusCode\r\n" + "}\r\n" + "echo $statusCode";
 				builder = new ProcessBuilder("powershell.exe", command);
@@ -329,7 +336,7 @@ public class Logger extends TimerTask {
 			}
 		} else {
 			try {
-				command = "curl -I -k -s --max-time 10 " + url + " | grep HTTP | awk '{print $2}'";
+				command = "curl -I -k -s --max-time 12 " + url + " | grep HTTP | awk '{print $2}'";
 				builder = new ProcessBuilder("bash", "-c", command);
 				builder.redirectErrorStream(true);
 				Process p = builder.start();
@@ -365,7 +372,8 @@ public class Logger extends TimerTask {
 
 	private void revertAndExit() {
 		System.out.println("Validation failed, refer to logs for further information.\nLoad Type: " + this.loadType
-				+ "\nLoad Utilization: " + this.loadUtilization + "\nLoad Duration: " + this.loadDuration + "\nReverting and exiting...");
+				+ "\nLoad Utilization: " + this.loadUtilization + "\nLoad Duration: " + this.loadDuration
+				+ "\nReverting and exiting...");
 		if (MainMenu.loadType.equals("Network Packet Delay")) {
 			NetworkEmulator.stopLag(this.os, MainMenu.loadUtilization);
 		}
