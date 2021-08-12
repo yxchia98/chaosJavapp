@@ -81,11 +81,11 @@ public class CLIFormatter implements Runnable {
 	}
 
 	public String getUrl() {
-		return ((url == null) ? "" : url[0]);
+		return ((url == null) ? "" : ((url.length == 0) ? "" : url[0]));
 	}
 	
 	public String getService() {
-		return ((service == null) ? "" : service[0]);
+		return ((service == null) ? "" : ((service.length == 0) ? "" : service[0]));
 	}
 
 	@Override

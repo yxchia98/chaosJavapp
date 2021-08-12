@@ -9,8 +9,8 @@ import java.util.zip.ZipException;
 
 public class NetworkEmulator extends Loader {
 
-	private int duration;
-	private double utilization;
+	private int duration = 5;
+	private double utilization = 50;
 	private String type = "lag";
 	private URI zipfile;
 	private String zipfilepath, folder;
@@ -33,7 +33,6 @@ public class NetworkEmulator extends Loader {
 			MainMenu.loadType = "Network Packet Delay";
 		} else if (this.type.equals("noise")) {
 			MainMenu.loadType = "Network Packet Duplicate";
-
 		} else if (this.type.equals("drop")) {
 			MainMenu.loadType = "Network Packet Drop";
 		} else if (this.type.equals("throttle")) {
