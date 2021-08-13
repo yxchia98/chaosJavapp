@@ -12,6 +12,7 @@ public class MainMenu {
 	public static double loadUtilization = 0;
 	public static boolean HTTPExperiment = false, ServiceExperiment = false;
 
+	// polymorphism method to execute load method
 	private static void executeLoad(Loader loadObj) {
 		loadObj.load();
 	}

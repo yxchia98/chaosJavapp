@@ -32,14 +32,15 @@ public class DiskWriter extends Loader {
 		System.out.println("Utilizing Disk for " + this.duration + "s at " + this.utilization + "%. ("
 				+ Logger.getCurrentDateTime() + ")");
 		File diskpartition = new File("/");
+		// get info for the root file partition, as well as the amount of space needed to bring it to target utilization
 		long totalspace = diskpartition.getTotalSpace();
 		long freespace = diskpartition.getUsableSpace();
 		long usedspace = totalspace - freespace;
 		double usedpercent = (double) usedspace / totalspace * 100;
 		double targetspace = this.utilization / 100 * totalspace;
 
-		File myObj = new File("hogger.txt");
-		myObj.deleteOnExit();
+		File myObj = new File("hogger.txt");	// instantiate a new text file to be used to occupy space
+		myObj.deleteOnExit();					// file will be deleted on system exit
 
 		System.out.println(
 				"Total space(100%):" + Math.toIntExact((long) (totalspace / Math.pow(2, 20))) + "MB   Used space("
@@ -48,6 +49,7 @@ public class DiskWriter extends Loader {
 						+ Math.toIntExact((long) (targetspace / Math.pow(2, 20))) + "MB.");
 
 		String operatingSystem = System.getProperty("os.name");
+		// depending on the current OS, execute respective methods
 		if (operatingSystem.contains("Windows")) {
 			this.loadWindows(diskpartition, myObj, totalspace, freespace, usedspace, usedpercent, targetspace);
 		} else if (operatingSystem.contains("Linux")) {

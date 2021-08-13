@@ -58,7 +58,7 @@ public class ResourceFile {
 		OutputStream fileStream;
 		
 		tempFile = new File(fileName);
-		entry = zipFile.getEntry(fileName);
+		entry = zipFile.getEntry(fileName);	// get file name inside jar
 
 		if (entry == null) {
 			throw new FileNotFoundException("cannot find file: " + fileName + " in archive: " + zipFile.getName());

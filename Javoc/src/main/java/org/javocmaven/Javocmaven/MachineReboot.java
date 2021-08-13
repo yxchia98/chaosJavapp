@@ -28,6 +28,7 @@ public class MachineReboot extends Loader {
 	}
 
 	private void rebootWindows() {
+		// execute powershell.exe and parse in command to restart system on windows
 		String command = "Restart-Computer -Force";
 		try {
 			System.out.println("Rebooting System in " + this.duration + "s. (Windows). (" + Logger.getCurrentDateTime() + ")");
@@ -40,7 +41,7 @@ public class MachineReboot extends Loader {
 	}
 
 	private void rebootLinux() {
-
+		// execute bash and parse in command to restart system on linux
 		String command = "shutdown -r now";
 		try {
 			System.out.println("Rebooting System in " + this.duration + "s. (Linux). (" + Logger.getCurrentDateTime() + ")");

@@ -72,6 +72,7 @@ public class Logger extends TimerTask {
 		this.os = System.getProperty("os.name"); // Get operating system name, to execute respective windows/linux
 													// commands
 
+		// capture current cpu utilization
 		try {
 			this.cpuload = getCPU(os);
 		} catch (IOException e) {
@@ -84,38 +85,44 @@ public class Logger extends TimerTask {
 			this.url = MainMenu.url;
 			this.httpstatus = checkHTTPResponse(os, this.url);
 			if (this.httpstatus.equals("Connection Failed.") || this.httpstatus.charAt(0) == '4'
-					|| this.httpstatus.charAt(0) == '5') {
+					|| this.httpstatus.charAt(0) == '5') { // validation fails if connection failed or an HTTP error
+															// response is received
 				System.out.println("Failed to establish connection to \"" + this.url + "\".");
-				revertAndExit();
+				revertAndExit(); // revert current tests and exit
 			}
 		}
+		// Check if there is a need for service validation
 		if (MainMenu.ServiceExperiment) {
 			this.service = MainMenu.service;
-			ArrayList<String> services = getSerivces(os);
+			ArrayList<String> services = getSerivces(os); // instantiate and get array list of services
 			for (String str : services) {
-				if(processRegionMatches(str, this.service)) {
+				if (processRegionMatches(str, this.service)) { // check if requested service exists
 					this.validateService = "Success";
 					break;
 				}
 			}
-			if(!this.validateService.equals("Success")) {
-				this.validateService = "Failed";
+			if (!this.validateService.equals("Success")) {
+				this.validateService = "Failed"; // mark validation as failed if no matches found
 				System.out.println("Requested service \"" + this.service + "\" is not running on the system.");
-				revertAndExit();
+				revertAndExit(); // Revert current tests and exit
 			}
 		}
+
+		// Export logs
 		exportTXT();
 		exportCSV();
 		exportJSON();
 	}
-	
+
+	// Faster string.contains() method
 	private boolean processRegionMatches(String str, String substr) {
-	    for (int i = str.length() - substr.length(); i >= 0; i--) 
-	        if (str.regionMatches(true, i, substr, 0, substr.length())) 
-	            return true; 
-	    return false;
+		for (int i = str.length() - substr.length(); i >= 0; i--)
+			if (str.regionMatches(true, i, substr, 0, substr.length()))
+				return true;
+		return false;
 	}
 
+	// Method to export logs to CSV, CSV will be placed in the javoc_log folder.
 	private void exportCSV() {
 
 		List<String[]> csvData = new ArrayList<>();
@@ -123,6 +130,7 @@ public class Logger extends TimerTask {
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 
+		// Parse in currently captured details into CSV row.
 		String[] csvLog = { this.date, this.time, this.os, this.loadType, this.loadUtilization, this.loadDuration,
 				this.cpuload, this.totalmem_string, this.usedmem_string, this.usedpercentmem_string,
 				this.totalspace_string, this.usedspace_string, this.usedpercentdisk_string, this.url, this.httpstatus };
@@ -141,10 +149,11 @@ public class Logger extends TimerTask {
 			}
 
 		} else {
-			// create new file and add headers before logging data
+			// create new file and add headers before logging data.
 			String[] header = { "Log Date", "Log Time", "Platform", "Load Type", "Load Utilization", "Load Duration",
 					"CPU Load(%)", "Total Memory(MB)", "Used Memory(MB)", "Used Memory(%)", "Total Space(MB)",
-					"Used Space(MB)", "Used Space(%)", "HTTP Validation URL", "HTTP Response", "Service", "Service Validation" };
+					"Used Space(MB)", "Used Space(%)", "HTTP Validation URL", "HTTP Response", "Service",
+					"Service Validation" };
 			try {
 				CsvWriter csv = CsvWriter.builder().build(file.toPath(), StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE);
@@ -161,14 +170,18 @@ public class Logger extends TimerTask {
 
 	}
 
+	// Method to export logs to JSON format, logs will be placed in the javoc_log
+	// folder
 	private void exportJSON() {
 
-		LinkedHashMap<String, Object> valuesmap = new LinkedHashMap<>();
+		LinkedHashMap<String, Object> valuesmap = new LinkedHashMap<>(); // create hashmap to map key:value pair for
+																			// JSON
 
 		String path = "." + File.separator + "javoc_log" + File.separator + "javoclog.json";
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 
+		// Adding key:value fields into the hash map
 		valuesmap.put("Log Date", this.date);
 		valuesmap.put("Log Time", this.time);
 		valuesmap.put("Platform", this.os);
@@ -186,7 +199,7 @@ public class Logger extends TimerTask {
 		valuesmap.put("HTTP Response", this.httpstatus);
 		valuesmap.put("Service", this.service);
 		valuesmap.put("Service Validation", this.validateService);
-		GsonBuilder builder = new GsonBuilder();
+		GsonBuilder builder = new GsonBuilder(); // build JSON using GSON library
 		builder.setPrettyPrinting();
 		String jsonData = builder.create().toJson(valuesmap);
 
@@ -199,19 +212,10 @@ public class Logger extends TimerTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-//		File javoclog = new File("javoc_log.json");
-//		FileOutputStream fos;
-//		try {
-//			fos = new FileOutputStream(javoclog, true);
-//			fos.write(jsonData.getBytes());
-//			fos.close();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-
 	}
 
+	// Method to export logs to TXT format, logs will be placed in the javoc_log
+	// folder
 	private void exportTXT() {
 
 		String path = "." + File.separator + "javoc_log" + File.separator + "javoclog.txt";
@@ -237,7 +241,7 @@ public class Logger extends TimerTask {
 				+ "%): " + this.usedspace_string + "MB\n";
 
 		logtxt += "HTTP Validation URL: " + this.url + "\nHTTP Response: " + this.httpstatus + "\n";
-		
+
 		logtxt += "Service: " + this.service + "\nService Validation: " + this.validateService + "\n\n";
 
 		File javoclog = new File(path);
@@ -251,12 +255,16 @@ public class Logger extends TimerTask {
 		}
 	}
 
+	// Method to get current CPU utilization for windows/linux
 	private String getCPU(String operatingSystem) throws IOException {
 		String line = null;
 		ProcessBuilder builder = null;
 		if (operatingSystem.contains("Windows")) {
 			builder = new ProcessBuilder("powershell.exe",
-					"Get-WmiObject -class win32_processor | Measure-Object -property LoadPercentage -Average | Select-Object -ExpandProperty Average");
+					"Get-WmiObject -class win32_processor | Measure-Object -property LoadPercentage -Average | Select-Object -ExpandProperty Average"); // new
+																																						// processbuilder
+																																						// using
+																																						// powershell
 			builder.redirectErrorStream(true);
 			Process p = builder.start();
 			p.getOutputStream().close();
@@ -277,7 +285,7 @@ public class Logger extends TimerTask {
 			}
 		} else if (operatingSystem.contains("Linux")) {
 			builder = new ProcessBuilder("bash", "-c",
-					"top -bn1 | grep -Po \"[0-9.]*(?=( id,))\" | awk '{print 100 - $1}'");
+					"top -bn1 | grep -Po \"[0-9.]*(?=( id,))\" | awk '{print 100 - $1}'");	// new processbuilder using bash
 //			builder = new ProcessBuilder("bash", "-c",
 //					"top -bn1 | grep -Po \"[0-9.]*(?=( id,))\" | awk '{print 100 - $1\"%\"}'");
 			builder.redirectErrorStream(true);
@@ -302,6 +310,7 @@ public class Logger extends TimerTask {
 		return line;
 	}
 
+	// Method to get current date time
 	public static String getCurrentDateTime() {
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		Date datetime = new Date(ts.getTime());
@@ -310,11 +319,12 @@ public class Logger extends TimerTask {
 		return datetimestring;
 	}
 
+	// Method to validify HTTP response of the url parsed in
 	private String checkHTTPResponse(String type, String url) {
 		String command;
 		String line = "";
 		ProcessBuilder builder;
-		if (type.contains("Windows")) {
+		if (type.contains("Windows")) { // execute the following string on powershell if the system is windows
 			try {
 				command = "add-type @\"\"\r\n" + "    using System.Net;\r\n"
 						+ "    using System.Security.Cryptography.X509Certificates;\r\n"
@@ -327,16 +337,17 @@ public class Logger extends TimerTask {
 						+ "\r\n" + "try{\r\n" + "$result = Invoke-WebRequest -Uri \"" + url + "\" -TimeoutSec 12\r\n"
 						+ "$statusCode = [int]$result.StatusCode\r\n" + "}\r\n" + "catch [System.Net.WebException]{\r\n"
 						+ "$statusCode = [int]$_.Exception.Response.StatusCode\r\n" + "}\r\n" + "echo $statusCode";
-				builder = new ProcessBuilder("powershell.exe", command);
+				builder = new ProcessBuilder("powershell.exe", command); // create new process builder, specificing to
+																			// use powershell.exe
 				builder.redirectErrorStream(true);
-				Process p = builder.start();
+				Process p = builder.start(); // execute the command
 				p.getOutputStream().close();
 				BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
 				while ((line = stdout.readLine()) != null) {
 					stdout.close();
 					p.destroy();
 					if (Objects.equals(line, "") || Objects.equals(line, "0")) {
-						line = "Connection Failed.";
+						line = "Connection Failed."; // if the returned output is empty or 0, connection has failed
 					}
 					return line;
 				}
@@ -346,7 +357,7 @@ public class Logger extends TimerTask {
 					stderr.close();
 					p.destroy();
 					if (Objects.equals(line, "") || Objects.equals(line, "0")) {
-						line = "Connection Failed.";
+						line = "Connection Failed."; // mark connection as failed if an error occurred
 					}
 					return line;
 				}
@@ -354,9 +365,9 @@ public class Logger extends TimerTask {
 				e.printStackTrace();
 			}
 		} else {
-			try {
+			try { // execute the following string on bash if system is linux
 				command = "curl -I -k -s --max-time 12 " + url + " | grep HTTP | awk '{print $2}'";
-				builder = new ProcessBuilder("bash", "-c", command);
+				builder = new ProcessBuilder("bash", "-c", command); // instantiate process builder, using bash
 				builder.redirectErrorStream(true);
 				Process p = builder.start();
 				p.getOutputStream().close();
@@ -365,7 +376,7 @@ public class Logger extends TimerTask {
 					stdout.close();
 					p.destroy();
 					if (Objects.equals(line, "") || Objects.equals(line, "0")) {
-						line = "Connection Failed.";
+						line = "Connection Failed."; // mark connection as failed if console output is of 0 or ""
 					}
 					return line;
 				}
@@ -375,7 +386,7 @@ public class Logger extends TimerTask {
 					stderr.close();
 					p.destroy();
 					if (Objects.equals(line, "") || Objects.equals(line, "0")) {
-						line = "Connection Failed.";
+						line = "Connection Failed."; // mark connection as failed if there is an error
 					}
 					return line;
 				}
@@ -384,17 +395,20 @@ public class Logger extends TimerTask {
 			}
 		}
 		if (Objects.equals(line, "") || Objects.equals(line, "0") || Objects.equals(line, null)) {
-			line = "Connection Failed.";
+			line = "Connection Failed."; // if the console has no output and the return value is still null, mark
+											// connection as failed
 		}
 		return line;
 	}
 
 	private ArrayList<String> getSerivces(String operatingSystem) {
-		ArrayList<String> serviceList = new ArrayList<>();
+		ArrayList<String> serviceList = new ArrayList<>(); // instantiate array list to contain all the retrived
+															// services
 		if (operatingSystem.contains("Windows")) {
 			String command = "Get-Service | Where-Object {$_.Status -eq \"\"Running\"\"\"} | Format-Table -Property Name -HideTableHeaders";
 			try {
-				ProcessBuilder builder = new ProcessBuilder("powershell.exe", command);
+				ProcessBuilder builder = new ProcessBuilder("powershell.exe", command); // instantiate new process
+																						// builder using powershell.exe
 				builder.redirectErrorStream(true);
 				Process p = builder.start();
 				p.getOutputStream().close();
@@ -403,7 +417,8 @@ public class Logger extends TimerTask {
 				BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
 				while ((line = stdout.readLine()) != null) {
 					if (!line.equals("")) {
-						serviceList.add(line);
+						serviceList.add(line); // if console output is not empty, add current line into the services
+												// array
 					}
 
 				}
@@ -411,7 +426,7 @@ public class Logger extends TimerTask {
 				// Standard Error
 				BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 				while ((line = stderr.readLine()) != null) {
-					System.out.println(line);
+					System.out.println(line); // print out error
 				}
 				stderr.close();
 				p.destroy();
@@ -422,7 +437,8 @@ public class Logger extends TimerTask {
 		} else if (operatingSystem.contains("Linux")) {
 			String command = "systemctl --type=service --no-legend | grep running | awk '{print $1}'";
 			try {
-				ProcessBuilder builder = new ProcessBuilder("bash", "-c", command);
+				ProcessBuilder builder = new ProcessBuilder("bash", "-c", command); // instantitate new processbuilder
+																					// using bash
 				builder.redirectErrorStream(true);
 				Process p = builder.start();
 				p.getOutputStream().close();
@@ -431,7 +447,7 @@ public class Logger extends TimerTask {
 				BufferedReader stdout = new BufferedReader(new InputStreamReader(p.getInputStream()));
 				while ((line = stdout.readLine()) != null) {
 					if (!line.equals("")) {
-						serviceList.add(line);
+						serviceList.add(line); // if console output is not empty, add it to the services array
 					}
 
 				}
@@ -439,7 +455,7 @@ public class Logger extends TimerTask {
 				// Standard Error
 				BufferedReader stderr = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 				while ((line = stderr.readLine()) != null) {
-					System.out.println(line);
+					System.out.println(line); // print out error
 				}
 				stderr.close();
 				p.destroy();
@@ -452,12 +468,15 @@ public class Logger extends TimerTask {
 	}
 
 	private void revertAndExit() {
+		// export current logs before exiting.
 		exportTXT();
 		exportCSV();
 		exportJSON();
+		// print test fail info to console
 		System.out.println("Validation failed, refer to logs for further information.\nLoad Type: " + this.loadType
 				+ "\nLoad Utilization: " + this.loadUtilization + "\nLoad Duration: " + this.loadDuration
 				+ "\nReverting and exiting...");
+		// revert any currently applied policies or configurations from the chaos applied
 		if (MainMenu.loadType.equals("Network Packet Delay")) {
 			NetworkEmulator.stopLag(this.os, MainMenu.loadUtilization);
 		}
@@ -470,6 +489,7 @@ public class Logger extends TimerTask {
 		if (MainMenu.loadType.equals("Network Bandwidth Throttling")) {
 			NetworkEmulator.stopThrottle(this.os, MainMenu.loadUtilization);
 		}
+		// terminate the java application
 		System.exit(0);
 		return;
 	}
