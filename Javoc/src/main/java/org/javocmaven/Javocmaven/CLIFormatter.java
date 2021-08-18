@@ -9,14 +9,14 @@ public class CLIFormatter implements Runnable {
 	@Option(names = { "-seconds", "--seconds" }, description = "Evaluate duration as seconds instead of minutes")
 	private boolean seconds = false;
 
-	@Option(names = { "-cpu", "--cpu" }, arity = "*", description = "Load CPU for <duration> <utilization%>")
+	@Option(names = { "-cpu", "--cpu" }, arity = "*", description = "Load CPU for <duration> <utilization%%>")
 	private String[] cpuvalues;
 
-	@Option(names = { "-mem", "--mem" }, arity = "*", description = "Load Memory for <duration> <utilization%>")
+	@Option(names = { "-mem", "--mem" }, arity = "*", description = "Load Memory for <duration> <utilization%%>")
 	private String[] memvalues;
 
 	@Option(names = { "-disk",
-			"--disk" }, arity = "*", description = "Load Disk for <duration> <utilization%> on root volume")
+			"--disk" }, arity = "*", description = "Load Disk for <duration> <utilization%%> on root volume")
 	private String[] diskvalues;
 
 	@Option(names = { "-netlag",
@@ -24,11 +24,11 @@ public class CLIFormatter implements Runnable {
 	private String[] netlagvalues;
 
 	@Option(names = { "-netnoise",
-			"--netnoise" }, arity = "*", description = "Duplicate Network Packets for <duration> <duplication%>")
+			"--netnoise" }, arity = "*", description = "Duplicate Network Packets for <duration> <duplication%%>")
 	private String[] netnoisevalues;
 
 	@Option(names = { "-netdrop",
-			"--netdrop" }, arity = "*", description = "Drop Network Packets for <duration> <packetloss%>")
+			"--netdrop" }, arity = "*", description = "Drop Network Packets for <duration> <packetloss%%>")
 	private String[] netdropvalues;
 
 	@Option(names = { "-netlimit",
