@@ -133,7 +133,7 @@ public class Logger extends TimerTask {
 		// Parse in currently captured details into CSV row.
 		String[] csvLog = { this.date, this.time, this.os, this.loadType, this.loadUtilization, this.loadDuration,
 				this.cpuload, this.totalmem_string, this.usedmem_string, this.usedpercentmem_string,
-				this.totalspace_string, this.usedspace_string, this.usedpercentdisk_string, this.url, this.httpstatus };
+				this.totalspace_string, this.usedspace_string, this.usedpercentdisk_string, this.url, this.httpstatus, this.service, this.validateService };
 		if (file.exists()) {
 			// append to file
 			try {
